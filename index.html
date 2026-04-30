@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Квест «Тайны Тобольска» — 10 точек</title>
+    <title>Квест «Тайны Тобольска» — Рейтинг и баллы</title>
     <style>
         * {
             box-sizing: border-box;
@@ -18,6 +18,17 @@
         .container {
             max-width: 650px;
             margin: 0 auto;
+        }
+        .score-panel {
+            background: #2c2b28;
+            color: #ffd966;
+            padding: 12px 20px;
+            border-radius: 60px;
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
         }
         .step {
             background: white;
@@ -66,8 +77,9 @@
             width: 100%;
             transition: 0.2s;
         }
-        button:hover {
-            background: #4f2f0a;
+        button:disabled {
+            background: #b0a088;
+            cursor: not-allowed;
         }
         .fact {
             background: #e9f0e6;
@@ -84,10 +96,14 @@
             margin: 15px 0 8px 0;
             font-size: 0.95rem;
         }
-        hr {
-            margin: 15px 0;
-            border: none;
-            border-top: 1px solid #e2d8cc;
+        .hint {
+            background: #fff3cd;
+            padding: 10px;
+            border-radius: 16px;
+            margin-top: 12px;
+            font-size: 0.9rem;
+            color: #856404;
+            display: none;
         }
         .progress {
             background: #ddd6cc;
@@ -112,9 +128,6 @@
             background: #2c6e2c;
             margin-top: 15px;
         }
-        .share-btn:hover {
-            background: #1e4a1e;
-        }
         .toast {
             visibility: hidden;
             min-width: 200px;
@@ -136,221 +149,249 @@
             visibility: visible;
             opacity: 0.95;
         }
-        .correct-badge {
-            display: inline-block;
-            background: #2c6e2c;
-            color: white;
-            border-radius: 30px;
-            font-size: 12px;
-            padding: 3px 12px;
-            margin-top: 8px;
+        .trophy {
+            font-size: 80px;
+            margin: 20px 0;
         }
     </style>
 </head>
 <body>
 <div class="container">
     <h1 style="text-align:center;">🗝️ Квест «Тайны Тобольска»</h1>
-    <p style="text-align:center; color:#5a4a3a;">Передвигайтесь по точкам, вводите ответы — открывайте историю города.</p>
+    <div class="score-panel">
+        <span>⭐ Баллы: <span id="totalScore">0</span></span>
+        <span>✅ Пройдено: <span id="completedCount">0</span>/10</span>
+    </div>
     <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
 
-    <!-- ТОЧКА 1 -->
-    <div class="step" id="step1">
-        <div class="step-header">📍 Точка 1. Пристань / Набережная</div>
-        <div class="task"><strong>👣 Задание:</strong> Найди скульптуру или стенд у реки, связанный с основателем Сибири. Кто изображён верхом на коне?</div>
-        <div class="riddle">«Стрелой Иртыш я покорил, <br> Хан Кучум бежал в испуге. <br> Моя фамилия — ...»</div>
-        <input type="text" id="ans1" placeholder="Введите фамилию" autocomplete="off">
-        <button onclick="checkAnswer(1,'ермак','step1Next')">Проверить</button>
-        <div id="fact1" class="fact"></div>
-        <div id="step1Next" style="display:none;" class="task">✅ <strong>Задание на следующую точку:</strong> Поднимитесь в Софийский двор кремля. Найдите знак «Место основания Тобольска». В каком году заложен первый острог?</div>
-    </div>
-
-    <div class="step" id="step2" style="display:none;">
-        <div class="step-header">📍 Точка 2. Софийский собор (знак основания)</div>
-        <div class="riddle">«Четыре цифры: год рожденья града. Сложи их все до одного, но здесь введи число родное. 1+5+8+7 = ?»</div>
-        <input type="text" id="ans2" placeholder="Введите число (год или сумму)">
-        <button onclick="checkAnswer(2,['1587','21'],'step2Next')">Проверить</button>
-        <div id="fact2" class="fact"></div>
-        <div id="step2Next" style="display:none;" class="task">➡️ <strong>Далее:</strong> Идите к Тюремному замку (Тобольский централ). На табличке найдите фамилию знаменитого писателя-каторжанина.</div>
-    </div>
-
-    <div class="step" id="step3" style="display:none;">
-        <div class="step-header">📍 Точка 3. Тюремный замок</div>
-        <div class="riddle">«Я создал роман про главного героя, здесь шёл путём на каторгу в ссылку. Моя фамилия всем вам знакома». Кто?</div>
-        <input type="text" id="ans3" placeholder="Фамилия писателя">
-        <button onclick="checkAnswer(3,'достоевский','step3Next')">Проверить</button>
-        <div id="fact3" class="fact"></div>
-        <div id="step3Next" style="display:none;" class="task">🏛️ <strong>Далее:</strong> К Гостиному двору (внутри кремля). Найдите плиту с римскими цифрами «XVIII век». Какое число это?</div>
-    </div>
-
-    <div class="step" id="step4" style="display:none;">
-        <div class="step-header">📍 Точка 4. Гостиный двор</div>
-        <div class="riddle">«XVIII римскими — какой век? Введи цифру (без мягких знаков)!»</div>
-        <input type="text" id="ans4" placeholder="Число">
-        <button onclick="checkAnswer(4,['18','восемнадцать','18 век'],'step4Next')">Проверить</button>
-        <div id="fact4" class="fact"></div>
-        <div id="step4Next" style="display:none;" class="task">🦊 <strong>Далее:</strong> Перейдите к Рентерее (башня с часами). Рассмотрите герб города. Верхняя часть щита — какое животное?</div>
-    </div>
-
-    <div class="step" id="step5" style="display:none;">
-        <div class="step-header">📍 Точка 5. Рентерея (Приказная палата)</div>
-        <div class="riddle">«Пушной зверёк, что целится из лука, гордость тайги, сибирская …»</div>
-        <input type="text" id="ans5" placeholder="Животное">
-        <button onclick="checkAnswer(5,'соболь','step5Next')">Проверить</button>
-        <div id="fact5" class="fact"></div>
-        <div id="step5Next" style="display:none;" class="task">🗺️ <strong>Следующее задание:</strong> На смотровой площадке у кремля — памятник Семёну Ремезову. Кем он был? (одно слово на постаменте).</div>
-    </div>
-
-    <div class="step" id="step6" style="display:none;">
-        <div class="step-header">📍 Точка 6. Памятник Семёну Ремезову</div>
-        <div class="riddle">«Не художник, не строитель, но чертил он всю Сибирь. Творец атласа, древний …»</div>
-        <input type="text" id="ans6" placeholder="Профессия">
-        <button onclick="checkAnswer(6,['картограф','чертёжник'],'step6Next')">Проверить</button>
-        <div id="fact6" class="fact"></div>
-        <div id="step6Next" style="display:none;" class="task">🏠 <strong>Далее:</strong> Идите к Дому Корнилова (ул. Октябрьская, 2). На табличке — фамилия купцов-меценатов.</div>
-    </div>
-
-    <div class="step" id="step7" style="display:none;">
-        <div class="step-header">📍 Точка 7. Дом Корнилова</div>
-        <div class="riddle">«Первое электричество в Сибири, мрамор, пароходы. Чья это династия?»</div>
-        <input type="text" id="ans7" placeholder="Фамилия">
-        <button onclick="checkAnswer(7,'корниловы','step7Next')">Проверить</button>
-        <div id="fact7" class="fact"></div>
-        <div id="step7Next" style="display:none;" class="task">🧪 <strong>Далее:</strong> Памятник Менделееву у бывшего реального училища. Год установки — 1984. Введите последнюю цифру.</div>
-    </div>
-
-    <div class="step" id="step8" style="display:none;">
-        <div class="step-header">📍 Точка 8. Памятник Дмитрию Менделееву</div>
-        <div class="riddle">«Год стоит: 1984. Цифра последняя — открой секрет.»</div>
-        <input type="text" id="ans8" placeholder="Цифра">
-        <button onclick="checkAnswer(8,['4','четыре'],'step8Next')">Проверить</button>
-        <div id="fact8" class="fact"></div>
-        <div id="step8Next" style="display:none;" class="task">⚔️ <strong>Следующее:</strong> На площади Победы найдите памятник воинам-сибирякам. Какое оружие в руках у фигуры?</div>
-    </div>
-
-    <div class="step" id="step9" style="display:none;">
-        <div class="step-header">📍 Точка 9. Памятник воинам-сибирякам</div>
-        <div class="riddle">«В руке железный клинок, защитника символ. Назови оружие одним словом.»</div>
-        <input type="text" id="ans9" placeholder="Оружие">
-        <button onclick="checkAnswer(9,['меч','мечом','шпага','сабля'],'step9Next')">Проверить</button>
-        <div id="fact9" class="fact"></div>
-        <div id="step9Next" style="display:none;" class="task">🎭 <strong>Финальный шаг:</strong> В Доме губернатора (кремль) найдите фамилию декабриста, отбывавшего ссылку.</div>
-    </div>
-
-    <div class="step" id="step10" style="display:none;">
-        <div class="step-header">📍 Точка 10. Дом губернатора</div>
-        <div class="riddle">«Басаргин или Муравьёв — Укажет точно мемориал. Введи фамилию (с большой буквы)» (подсказка: чаще всего Басаргин)</div>
-        <input type="text" id="ans10" placeholder="Фамилия декабриста">
-        <button onclick="checkAnswer(10,['басаргин','муравьев-апостол','басаргина'],'finalBlock')">Проверить</button>
-        <div id="fact10" class="fact"></div>
-        <div id="finalBlock" style="display:none;"></div>
-    </div>
-
-    <div id="congrats" style="display:none;" class="final-message">
-        🎉 ПОЗДРАВЛЯЕМ! 🎉<br>
-        Вы прошли 10 тайн Тобольска. Легендарное тобольское печенье и вид на Иртыш — ваши!<br>
-        Квест завершён.<br><br>
-        <button id="shareResultsBtn" class="share-btn">📤 Поделиться результатами</button>
-    </div>
+    <div id="stepsContainer"></div>
+    <div id="congrats" style="display:none;" class="final-message"></div>
+    <div id="toastMsg" class="toast">📋 Скопировано в буфер!</div>
 </div>
 
-<div id="toastMsg" class="toast">📋 Скопировано в буфер!</div>
-
 <script>
-    let completed = 0;
-    function updateProgress() {
-        let percent = (completed / 10) * 100;
+    // Данные по точкам
+    const stepsData = [
+        { id: 1, title: "Пристань / Набережная", task: "Найди скульптуру или стенд у реки, связанный с основателем Сибири. Кто изображён верхом на коне?", riddle: "«Стрелой Иртыш я покорил, Хан Кучум бежал в испуге. Моя фамилия — ...»", correctAnswersPlain: ["ермак"], nextTask: "Поднимитесь в Софийский двор кремля. Найдите знак «Место основания Тобольска». В каком году заложен первый острог?" },
+        { id: 2, title: "Софийский собор (знак основания)", task: null, riddle: "«Четыре цифры: год рожденья града. Сложи их все до одного, но здесь введи число родное. 1+5+8+7 = ?»", correctAnswersPlain: ["1587","21"], nextTask: "Идите к Тюремному замку. Найдите фамилию знаменитого писателя-каторжанина." },
+        { id: 3, title: "Тюремный замок", task: null, riddle: "«Я создал роман про главного героя, здесь шёл путём на каторгу в ссылку. Моя фамилия всем вам знакома». Кто?", correctAnswersPlain: ["достоевский"], nextTask: "К Гостиному двору. Найдите плиту с римскими цифрами «XVIII век». Какое число это?" },
+        { id: 4, title: "Гостиный двор", task: null, riddle: "«XVIII римскими — какой век? Введи цифру!»", correctAnswersPlain: ["18","восемнадцать","18 век"], nextTask: "Перейдите к Рентерее (башня с часами). Герб города — какое животное в верхней части?" },
+        { id: 5, title: "Рентерея", task: null, riddle: "«Пушной зверёк, что целится из лука, гордость тайги, сибирская …»", correctAnswersPlain: ["соболь"], nextTask: "Памятник Семёну Ремезову. Кем он был? (одно слово)" },
+        { id: 6, title: "Памятник Семёну Ремезову", task: null, riddle: "«Не художник, не строитель, но чертил он всю Сибирь. Творец атласа, древний …»", correctAnswersPlain: ["картограф","чертёжник"], nextTask: "Дом Корнилова (ул. Октябрьская, 2). Фамилия купцов-меценатов." },
+        { id: 7, title: "Дом Корнилова", task: null, riddle: "«Первое электричество в Сибири, мрамор, пароходы. Чья это династия?»", correctAnswersPlain: ["корниловы"], nextTask: "Памятник Менделееву. Год установки — 1984. Введите последнюю цифру." },
+        { id: 8, title: "Памятник Менделееву", task: null, riddle: "«Год стоит: 1984. Цифра последняя — открой секрет.»", correctAnswersPlain: ["4","четыре"], nextTask: "Памятник воинам-сибирякам. Какое оружие в руках у фигуры?" },
+        { id: 9, title: "Памятник воинам-сибирякам", task: null, riddle: "«В руке железный клинок, защитника символ. Назови оружие одним словом.»", correctAnswersPlain: ["меч","шпага","сабля"], nextTask: "Дом губернатора. Фамилия декабриста в ссылке." },
+        { id: 10, title: "Дом губернатора", task: null, riddle: "«Басаргин или Муравьёв — Укажет точно мемориал. Введи фамилию»", correctAnswersPlain: ["басаргин","муравьев-апостол","басаргина"], nextTask: null }
+    ];
+
+    const facts = {
+        1: 'Ермак Тимофеевич начал освоение Сибири в 1582 году.',
+        2: 'Тобольск основан в 1587 году отрядом Данилы Чулкова.',
+        3: 'Достоевскому в Тобольске подарили Евангелие на всю жизнь.',
+        4: 'Гостиный двор — единственный каменный торговый двор XVIII века в Сибири.',
+        5: 'Соболь на гербе — символ пушного богатства Сибири.',
+        6: 'Семён Ремезов — создатель первого атласа Сибири.',
+        7: 'Дом Корниловых — первый в Сибири с электричеством и водопроводом.',
+        8: 'Менделеев родился в Тобольске в 1834 году.',
+        9: 'Сибиряки — гордость русской армии.',
+        10: 'Декабристы создали в Тобольске литературный кружок.'
+    };
+
+    let state = {
+        currentStep: 0,
+        scores: Array(10).fill(0),
+        attempts: Array(10).fill(0),
+        completed: Array(10).fill(false),
+        shownHint: Array(10).fill(false),
+        totalScore: 0
+    };
+
+    function saveState() {
+        localStorage.setItem('questState', JSON.stringify(state));
+    }
+
+    function loadState() {
+        const saved = localStorage.getItem('questState');
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved);
+                if (parsed.scores && parsed.scores.length === 10) state = parsed;
+            } catch(e) {}
+        }
+        updateUI();
+    }
+
+    function updateUI() {
+        document.getElementById('totalScore').innerText = state.totalScore;
+        const completedCount = state.completed.filter(c => c === true).length;
+        document.getElementById('completedCount').innerText = `${completedCount}/10`;
+        const percent = (completedCount / 10) * 100;
         document.getElementById('progressBar').style.width = percent + "%";
-        if(completed === 10) {
-            document.getElementById('congrats').style.display = 'block';
+        
+        renderSteps();
+        if (state.completed.every(v => v === true)) showFinalScreen();
+        saveState();
+    }
+
+    function renderSteps() {
+        const container = document.getElementById('stepsContainer');
+        container.innerHTML = '';
+        for (let i = 0; i < stepsData.length; i++) {
+            const step = stepsData[i];
+            const isCompleted = state.completed[i];
+            if (isCompleted && i !== state.currentStep && i < state.currentStep) {
+                // показываем только пройденные свернуто?
+                continue;
+            }
+            if (!isCompleted && i > state.currentStep) {
+                continue;
+            }
+            const stepDiv = document.createElement('div');
+            stepDiv.className = 'step';
+            stepDiv.id = `step${i+1}`;
+            stepDiv.innerHTML = `
+                <div class="step-header">📍 Точка ${i+1}. ${step.title}</div>
+                ${step.task ? `<div class="task"><strong>👣 Задание:</strong> ${step.task}</div>` : ''}
+                <div class="riddle">${step.riddle}</div>
+                <input type="text" id="ans${i+1}" placeholder="Введите ответ" ${state.completed[i] ? 'disabled' : ''} autocomplete="off">
+                <button id="btn${i+1}" ${state.completed[i] ? 'disabled' : ''}>Проверить</button>
+                <div id="hint${i+1}" class="hint"></div>
+                <div id="fact${i+1}" class="fact"></div>
+                ${state.completed[i] && i+1 < stepsData.length ? `<div class="task">✅ <strong>Далее:</strong> ${stepsData[i].nextTask}</div>` : ''}
+            `;
+            container.appendChild(stepDiv);
+            
+            if (!state.completed[i]) {
+                const btn = document.getElementById(`btn${i+1}`);
+                const input = document.getElementById(`ans${i+1}`);
+                btn.onclick = () => checkAnswer(i);
+                input.onkeypress = (e) => { if(e.key === 'Enter') checkAnswer(i); };
+            }
         }
     }
 
-    function checkAnswer(step, correctVariants, nextStepId) {
-        let inputElem = document.getElementById('ans' + step);
-        let userAnswer = inputElem.value.trim().toLowerCase().replace(/[^а-яё0-9]/gi, '');
-        let isCorrect = false;
+    function checkAnswer(stepIdx) {
+        if (state.completed[stepIdx]) return;
         
-        let variants = Array.isArray(correctVariants) ? correctVariants : [correctVariants];
-        for(let v of variants) {
-            let cleanV = v.toString().toLowerCase().replace(/[^а-яё0-9]/gi, '');
-            if(userAnswer === cleanV || (v === 'ермак' && userAnswer === 'ермак') || (v === 'корниловы' && userAnswer === 'корниловы')) {
-                isCorrect = true;
-                break;
-            }
-        }
-        
-        let factElem = document.getElementById('fact' + step);
-        if(isCorrect) {
-            let facts = {
-                1: '✅ Ермак Тимофеевич начал освоение Сибири в 1582 году. Тобольск основан через 5 лет после его похода.',
-                2: '✅ Тобольск основан в 1587 году отрядом Данилы Чулкова. Это первый каменный кремль за Уралом.',
-                3: '✅ Достоевский в 1850 году следовал по этапу в Омск. В Тобольске ему подарили Евангелие, которое хранилось всю жизнь.',
-                4: '✅ Гостиный двор построен при Петре I в XVIII веке. Единственный каменный торговый двор XVIII в. в Сибири.',
-                5: '✅ Соболь на гербе — символ пушного богатства Сибири. Герб утверждён в 1785 году.',
-                6: '✅ Семён Ремезов — картограф, создавший первый атлас Сибири («Чертёжная книга», 1701 г.).',
-                7: '✅ Корниловы — купцы-меценаты. Их дом первым в Сибири получил электричество и водопровод.',
-                8: '✅ Менделеев родился в Тобольске (1834), учился в гимназии. Памятник открыт в 1984 г.',
-                9: '✅ Сибиряки — гордость русской армии. Тоболяки участвовали в войнах 1812 г., Первой мировой, ВОВ.',
-                10: '✅ Декабристы создали в Тобольске литературный кружок и школы. Николай Басаргин — один из ссыльных.'
-            };
-            factElem.innerHTML = `<strong>📜 Историческая справка:</strong> ${facts[step]}`;
-            factElem.style.display = 'block';
-            
-            let btn = event.target;
-            btn.disabled = true;
-            inputElem.disabled = true;
-            
-            if(nextStepId === 'finalBlock') {
-                document.getElementById('congrats').style.display = 'block';
-                completed++;
-                updateProgress();
-                return;
-            }
-            document.getElementById(nextStepId).style.display = 'block';
-            let nextStepNum = step + 1;
-            if(nextStepNum <= 10) {
-                document.getElementById('step' + nextStepNum).style.display = 'block';
-            }
-            completed++;
-            updateProgress();
-        } else {
-            factElem.innerHTML = '❌ Неверно. Посмотрите внимательнее на табличку или объект. Попробуйте ещё раз!';
-            factElem.style.display = 'block';
-            factElem.style.background = '#ffe0e0';
-            setTimeout(() => {
-                factElem.style.display = 'none';
-                factElem.style.background = '';
-            }, 2000);
-        }
-    }
-
-    // Функция шеринга (поделиться результатом)
-    document.addEventListener('click', function(e) {
-        if(e.target && e.target.id === 'shareResultsBtn') {
-            const shareText = 'Я прошёл квест «Тайны Тобольска» (10 точек) и узнал историю города! Попробуй и ты — ' + window.location.href;
-            
-            if (navigator.share) {
-                navigator.share({
-                    title: 'Тобольский квест',
-                    text: 'Я прошёл квест «Тайны Тобольска»!',
-                    url: window.location.href
-                }).catch(() => {
-                    fallbackCopy(shareText);
-                });
-            } else {
-                fallbackCopy(shareText);
-            }
-        }
-    });
-
-    function fallbackCopy(text) {
-        navigator.clipboard.writeText(text).then(() => {
-            const toast = document.getElementById('toastMsg');
-            toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 2000);
-        }).catch(() => {
-            alert('Скопируйте ссылку вручную: ' + window.location.href);
+        const step = stepsData[stepIdx];
+        const inputElem = document.getElementById(`ans${stepIdx+1}`);
+        const userAnswer = inputElem.value.trim().toLowerCase().replace(/[^а-яё0-9]/gi, '');
+        const isCorrect = step.correctAnswersPlain.some(corr => {
+            const cleanCorr = corr.toString().toLowerCase().replace(/[^а-яё0-9]/gi, '');
+            return userAnswer === cleanCorr;
         });
+        
+        const currentAttempt = state.attempts[stepIdx] + 1;
+        state.attempts[stepIdx] = currentAttempt;
+        
+        if (isCorrect) {
+            let points = 0;
+            if (currentAttempt === 1) points = 3;
+            else if (currentAttempt === 2) points = 2;
+            else if (currentAttempt === 3) points = 1;
+            else points = 0;
+            
+            state.scores[stepIdx] = points;
+            state.totalScore += points;
+            state.completed[stepIdx] = true;
+            state.currentStep = stepIdx + 1;
+            
+            const factDiv = document.getElementById(`fact${stepIdx+1}`);
+            factDiv.innerHTML = `<strong>📜 Историческая справка:</strong> ${facts[stepIdx+1]} <br> +${points} балла(ов) за ответ.`;
+            factDiv.style.display = 'block';
+            
+            const inputElemDis = document.getElementById(`ans${stepIdx+1}`);
+            const btnDis = document.getElementById(`btn${stepIdx+1}`);
+            inputElemDis.disabled = true;
+            btnDis.disabled = true;
+            
+            updateUI();
+        } else {
+            // Неправильный ответ
+            if (currentAttempt >= 3 && !state.shownHint[stepIdx]) {
+                state.shownHint[stepIdx] = true;
+                const hintDiv = document.getElementById(`hint${stepIdx+1}`);
+                hintDiv.innerHTML = `💡 <strong>Подсказка:</strong> Правильный ответ: ${step.correctAnswersPlain[0]}. Вы получаете 0 баллов за этот вопрос.`;
+                hintDiv.style.display = 'block';
+                
+                // Автоматически засчитываем с 0 баллов после подсказки
+                state.scores[stepIdx] = 0;
+                state.totalScore += 0;
+                state.completed[stepIdx] = true;
+                state.currentStep = stepIdx + 1;
+                
+                const factDiv = document.getElementById(`fact${stepIdx+1}`);
+                factDiv.innerHTML = `<strong>📜 Историческая справка:</strong> ${facts[stepIdx+1]} <br> ⚠️ Использована подсказка — 0 баллов.`;
+                factDiv.style.display = 'block';
+                
+                const inputElemDis = document.getElementById(`ans${stepIdx+1}`);
+                const btnDis = document.getElementById(`btn${stepIdx+1}`);
+                inputElemDis.disabled = true;
+                btnDis.disabled = true;
+                
+                updateUI();
+            } else {
+                const factDiv = document.getElementById(`fact${stepIdx+1}`);
+                factDiv.innerHTML = `❌ Неверно. Осталось попыток: ${3 - currentAttempt}. Попробуйте ещё!`;
+                factDiv.style.display = 'block';
+                factDiv.style.background = '#ffe0e0';
+                setTimeout(() => {
+                    if(factDiv.style.display === 'block') {
+                        factDiv.style.display = 'none';
+                        factDiv.style.background = '';
+                    }
+                }, 2000);
+            }
+        }
+        saveState();
+    }
+
+    function showFinalScreen() {
+        const maxScore = 10 * 3;
+        const finalScore = state.totalScore;
+        const congratsDiv = document.getElementById('congrats');
+        
+        let trophyHtml = '';
+        let message = '';
+        if (finalScore === maxScore) {
+            trophyHtml = '<div class="trophy">🏆✨ ЗОЛОТОЙ КУБОК ✨🏆</div>';
+            message = '<strong>🎉 ПОЗДРАВЛЯЕМ !! 🎉</strong><br>👏👏👏 Вы супер эрудит и знаток города! 👏👏👏';
+        } else {
+            trophyHtml = '<div class="trophy">⭐🏅⭐</div>';
+            message = `<strong>Квест пройден!</strong><br>Вы набрали ${finalScore} баллов из ${maxScore}.<br>Отличный результат, но в следующий раз попробуйте получить все 3 балла за каждый вопрос!`;
+        }
+        
+        congratsDiv.innerHTML = `
+            ${trophyHtml}
+            ${message}
+            <br><br>
+            <button id="shareResultsBtn" class="share-btn">📤 Поделиться результатами (${finalScore}/${maxScore})</button>
+            <button id="resetBtn" style="background:#7a4c1a; margin-top:10px;">🔄 Пройти квест заново</button>
+        `;
+        congratsDiv.style.display = 'block';
+        
+        document.getElementById('shareResultsBtn')?.addEventListener('click', () => {
+            const shareText = `Я прошёл квест «Тайны Тобольска» и набрал ${finalScore} из ${maxScore} баллов! Попробуй и ты — ${window.location.href}`;
+            if (navigator.share) {
+                navigator.share({ title: 'Тобольский квест', text: shareText });
+            } else {
+                navigator.clipboard.writeText(shareText);
+                const toast = document.getElementById('toastMsg');
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 2000);
+            }
+        });
+        
+        document.getElementById('resetBtn')?.addEventListener('click', () => {
+            localStorage.removeItem('questState');
+            location.reload();
+        });
+    }
+
+    // Инициализация
+    loadState();
+    if (!state.completed.some(v => v === true) && state.totalScore === 0) {
+        renderSteps();
     }
 </script>
 </body>
