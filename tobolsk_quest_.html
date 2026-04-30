@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Квест «Тайны Тобольска» — 10 точек</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: #f5f0e8;
+            margin: 0;
+            padding: 20px;
+            color: #2c2b28;
+        }
+        .container {
+            max-width: 650px;
+            margin: 0 auto;
+        }
+        .step {
+            background: white;
+            border-radius: 28px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            border-left: 6px solid #b8860b;
+        }
+        .step-header {
+            font-size: 20px;
+            font-weight: bold;
+            background: #f8f2e6;
+            display: inline-block;
+            padding: 5px 16px;
+            border-radius: 40px;
+            margin-bottom: 16px;
+            color: #7a4c1a;
+        }
+        .riddle {
+            background: #fef7e0;
+            padding: 14px;
+            border-radius: 20px;
+            font-style: italic;
+            margin: 12px 0;
+            border-left: 4px solid #d4a373;
+        }
+        input {
+            width: 100%;
+            padding: 14px 16px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 60px;
+            margin: 10px 0;
+            background: white;
+        }
+        button {
+            background: #7a4c1a;
+            color: white;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 60px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: 0.2s;
+        }
+        button:hover {
+            background: #4f2f0a;
+        }
+        .fact {
+            background: #e9f0e6;
+            padding: 14px;
+            border-radius: 20px;
+            margin-top: 15px;
+            display: none;
+            border-left: 4px solid #2c6e2c;
+        }
+        .task {
+            background: #e8eef4;
+            padding: 12px;
+            border-radius: 18px;
+            margin: 15px 0 8px 0;
+            font-size: 0.95rem;
+        }
+        hr {
+            margin: 15px 0;
+            border: none;
+            border-top: 1px solid #e2d8cc;
+        }
+        .progress {
+            background: #ddd6cc;
+            border-radius: 40px;
+            height: 8px;
+            margin: 25px 0 15px;
+        }
+        .progress-bar {
+            background: #b8860b;
+            width: 0%;
+            height: 8px;
+            border-radius: 40px;
+        }
+        .final-message {
+            background: #d4e2d4;
+            border-radius: 28px;
+            padding: 25px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .share-btn {
+            background: #2c6e2c;
+            margin-top: 15px;
+        }
+        .share-btn:hover {
+            background: #1e4a1e;
+        }
+        .toast {
+            visibility: hidden;
+            min-width: 200px;
+            background: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 40px;
+            padding: 12px;
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            font-size: 14px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .toast.show {
+            visibility: visible;
+            opacity: 0.95;
+        }
+        .correct-badge {
+            display: inline-block;
+            background: #2c6e2c;
+            color: white;
+            border-radius: 30px;
+            font-size: 12px;
+            padding: 3px 12px;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1 style="text-align:center;">🗝️ Квест «Тайны Тобольска»</h1>
+    <p style="text-align:center; color:#5a4a3a;">Передвигайтесь по точкам, вводите ответы — открывайте историю города.</p>
+    <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
+
+    <!-- ТОЧКА 1 -->
+    <div class="step" id="step1">
+        <div class="step-header">📍 Точка 1. Пристань / Набережная</div>
+        <div class="task"><strong>👣 Задание:</strong> Найди скульптуру или стенд у реки, связанный с основателем Сибири. Кто изображён верхом на коне?</div>
+        <div class="riddle">«Стрелой Иртыш я покорил, <br> Хан Кучум бежал в испуге. <br> Моя фамилия — ...»</div>
+        <input type="text" id="ans1" placeholder="Введите фамилию" autocomplete="off">
+        <button onclick="checkAnswer(1,'ермак','step1Next')">Проверить</button>
+        <div id="fact1" class="fact"></div>
+        <div id="step1Next" style="display:none;" class="task">✅ <strong>Задание на следующую точку:</strong> Поднимитесь в Софийский двор кремля. Найдите знак «Место основания Тобольска». В каком году заложен первый острог?</div>
+    </div>
+
+    <div class="step" id="step2" style="display:none;">
+        <div class="step-header">📍 Точка 2. Софийский собор (знак основания)</div>
+        <div class="riddle">«Четыре цифры: год рожденья града. Сложи их все до одного, но здесь введи число родное. 1+5+8+7 = ?»</div>
+        <input type="text" id="ans2" placeholder="Введите число (год или сумму)">
+        <button onclick="checkAnswer(2,['1587','21'],'step2Next')">Проверить</button>
+        <div id="fact2" class="fact"></div>
+        <div id="step2Next" style="display:none;" class="task">➡️ <strong>Далее:</strong> Идите к Тюремному замку (Тобольский централ). На табличке найдите фамилию знаменитого писателя-каторжанина.</div>
+    </div>
+
+    <div class="step" id="step3" style="display:none;">
+        <div class="step-header">📍 Точка 3. Тюремный замок</div>
+        <div class="riddle">«Я создал роман про главного героя, здесь шёл путём на каторгу в ссылку. Моя фамилия всем вам знакома». Кто?</div>
+        <input type="text" id="ans3" placeholder="Фамилия писателя">
+        <button onclick="checkAnswer(3,'достоевский','step3Next')">Проверить</button>
+        <div id="fact3" class="fact"></div>
+        <div id="step3Next" style="display:none;" class="task">🏛️ <strong>Далее:</strong> К Гостиному двору (внутри кремля). Найдите плиту с римскими цифрами «XVIII век». Какое число это?</div>
+    </div>
+
+    <div class="step" id="step4" style="display:none;">
+        <div class="step-header">📍 Точка 4. Гостиный двор</div>
+        <div class="riddle">«XVIII римскими — какой век? Введи цифру (без мягких знаков)!»</div>
+        <input type="text" id="ans4" placeholder="Число">
+        <button onclick="checkAnswer(4,['18','восемнадцать','18 век'],'step4Next')">Проверить</button>
+        <div id="fact4" class="fact"></div>
+        <div id="step4Next" style="display:none;" class="task">🦊 <strong>Далее:</strong> Перейдите к Рентерее (башня с часами). Рассмотрите герб города. Верхняя часть щита — какое животное?</div>
+    </div>
+
+    <div class="step" id="step5" style="display:none;">
+        <div class="step-header">📍 Точка 5. Рентерея (Приказная палата)</div>
+        <div class="riddle">«Пушной зверёк, что целится из лука, гордость тайги, сибирская …»</div>
+        <input type="text" id="ans5" placeholder="Животное">
+        <button onclick="checkAnswer(5,'соболь','step5Next')">Проверить</button>
+        <div id="fact5" class="fact"></div>
+        <div id="step5Next" style="display:none;" class="task">🗺️ <strong>Следующее задание:</strong> На смотровой площадке у кремля — памятник Семёну Ремезову. Кем он был? (одно слово на постаменте).</div>
+    </div>
+
+    <div class="step" id="step6" style="display:none;">
+        <div class="step-header">📍 Точка 6. Памятник Семёну Ремезову</div>
+        <div class="riddle">«Не художник, не строитель, но чертил он всю Сибирь. Творец атласа, древний …»</div>
+        <input type="text" id="ans6" placeholder="Профессия">
+        <button onclick="checkAnswer(6,['картограф','чертёжник'],'step6Next')">Проверить</button>
+        <div id="fact6" class="fact"></div>
+        <div id="step6Next" style="display:none;" class="task">🏠 <strong>Далее:</strong> Идите к Дому Корнилова (ул. Октябрьская, 2). На табличке — фамилия купцов-меценатов.</div>
+    </div>
+
+    <div class="step" id="step7" style="display:none;">
+        <div class="step-header">📍 Точка 7. Дом Корнилова</div>
+        <div class="riddle">«Первое электричество в Сибири, мрамор, пароходы. Чья это династия?»</div>
+        <input type="text" id="ans7" placeholder="Фамилия">
+        <button onclick="checkAnswer(7,'корниловы','step7Next')">Проверить</button>
+        <div id="fact7" class="fact"></div>
+        <div id="step7Next" style="display:none;" class="task">🧪 <strong>Далее:</strong> Памятник Менделееву у бывшего реального училища. Год установки — 1984. Введите последнюю цифру.</div>
+    </div>
+
+    <div class="step" id="step8" style="display:none;">
+        <div class="step-header">📍 Точка 8. Памятник Дмитрию Менделееву</div>
+        <div class="riddle">«Год стоит: 1984. Цифра последняя — открой секрет.»</div>
+        <input type="text" id="ans8" placeholder="Цифра">
+        <button onclick="checkAnswer(8,['4','четыре'],'step8Next')">Проверить</button>
+        <div id="fact8" class="fact"></div>
+        <div id="step8Next" style="display:none;" class="task">⚔️ <strong>Следующее:</strong> На площади Победы найдите памятник воинам-сибирякам. Какое оружие в руках у фигуры?</div>
+    </div>
+
+    <div class="step" id="step9" style="display:none;">
+        <div class="step-header">📍 Точка 9. Памятник воинам-сибирякам</div>
+        <div class="riddle">«В руке железный клинок, защитника символ. Назови оружие одним словом.»</div>
+        <input type="text" id="ans9" placeholder="Оружие">
+        <button onclick="checkAnswer(9,['меч','мечом','шпага','сабля'],'step9Next')">Проверить</button>
+        <div id="fact9" class="fact"></div>
+        <div id="step9Next" style="display:none;" class="task">🎭 <strong>Финальный шаг:</strong> В Доме губернатора (кремль) найдите фамилию декабриста, отбывавшего ссылку.</div>
+    </div>
+
+    <div class="step" id="step10" style="display:none;">
+        <div class="step-header">📍 Точка 10. Дом губернатора</div>
+        <div class="riddle">«Басаргин или Муравьёв — Укажет точно мемориал. Введи фамилию (с большой буквы)» (подсказка: чаще всего Басаргин)</div>
+        <input type="text" id="ans10" placeholder="Фамилия декабриста">
+        <button onclick="checkAnswer(10,['басаргин','муравьев-апостол','басаргина'],'finalBlock')">Проверить</button>
+        <div id="fact10" class="fact"></div>
+        <div id="finalBlock" style="display:none;"></div>
+    </div>
+
+    <div id="congrats" style="display:none;" class="final-message">
+        🎉 ПОЗДРАВЛЯЕМ! 🎉<br>
+        Вы прошли 10 тайн Тобольска. Легендарное тобольское печенье и вид на Иртыш — ваши!<br>
+        Квест завершён.<br><br>
+        <button id="shareResultsBtn" class="share-btn">📤 Поделиться результатами</button>
+    </div>
+</div>
+
+<div id="toastMsg" class="toast">📋 Скопировано в буфер!</div>
+
+<script>
+    let completed = 0;
+    function updateProgress() {
+        let percent = (completed / 10) * 100;
+        document.getElementById('progressBar').style.width = percent + "%";
+        if(completed === 10) {
+            document.getElementById('congrats').style.display = 'block';
+        }
+    }
+
+    function checkAnswer(step, correctVariants, nextStepId) {
+        let inputElem = document.getElementById('ans' + step);
+        let userAnswer = inputElem.value.trim().toLowerCase().replace(/[^а-яё0-9]/gi, '');
+        let isCorrect = false;
+        
+        let variants = Array.isArray(correctVariants) ? correctVariants : [correctVariants];
+        for(let v of variants) {
+            let cleanV = v.toString().toLowerCase().replace(/[^а-яё0-9]/gi, '');
+            if(userAnswer === cleanV || (v === 'ермак' && userAnswer === 'ермак') || (v === 'корниловы' && userAnswer === 'корниловы')) {
+                isCorrect = true;
+                break;
+            }
+        }
+        
+        let factElem = document.getElementById('fact' + step);
+        if(isCorrect) {
+            let facts = {
+                1: '✅ Ермак Тимофеевич начал освоение Сибири в 1582 году. Тобольск основан через 5 лет после его похода.',
+                2: '✅ Тобольск основан в 1587 году отрядом Данилы Чулкова. Это первый каменный кремль за Уралом.',
+                3: '✅ Достоевский в 1850 году следовал по этапу в Омск. В Тобольске ему подарили Евангелие, которое хранилось всю жизнь.',
+                4: '✅ Гостиный двор построен при Петре I в XVIII веке. Единственный каменный торговый двор XVIII в. в Сибири.',
+                5: '✅ Соболь на гербе — символ пушного богатства Сибири. Герб утверждён в 1785 году.',
+                6: '✅ Семён Ремезов — картограф, создавший первый атлас Сибири («Чертёжная книга», 1701 г.).',
+                7: '✅ Корниловы — купцы-меценаты. Их дом первым в Сибири получил электричество и водопровод.',
+                8: '✅ Менделеев родился в Тобольске (1834), учился в гимназии. Памятник открыт в 1984 г.',
+                9: '✅ Сибиряки — гордость русской армии. Тоболяки участвовали в войнах 1812 г., Первой мировой, ВОВ.',
+                10: '✅ Декабристы создали в Тобольске литературный кружок и школы. Николай Басаргин — один из ссыльных.'
+            };
+            factElem.innerHTML = `<strong>📜 Историческая справка:</strong> ${facts[step]}`;
+            factElem.style.display = 'block';
+            
+            let btn = event.target;
+            btn.disabled = true;
+            inputElem.disabled = true;
+            
+            if(nextStepId === 'finalBlock') {
+                document.getElementById('congrats').style.display = 'block';
+                completed++;
+                updateProgress();
+                return;
+            }
+            document.getElementById(nextStepId).style.display = 'block';
+            let nextStepNum = step + 1;
+            if(nextStepNum <= 10) {
+                document.getElementById('step' + nextStepNum).style.display = 'block';
+            }
+            completed++;
+            updateProgress();
+        } else {
+            factElem.innerHTML = '❌ Неверно. Посмотрите внимательнее на табличку или объект. Попробуйте ещё раз!';
+            factElem.style.display = 'block';
+            factElem.style.background = '#ffe0e0';
+            setTimeout(() => {
+                factElem.style.display = 'none';
+                factElem.style.background = '';
+            }, 2000);
+        }
+    }
+
+    // Функция шеринга (поделиться результатом)
+    document.addEventListener('click', function(e) {
+        if(e.target && e.target.id === 'shareResultsBtn') {
+            const shareText = 'Я прошёл квест «Тайны Тобольска» (10 точек) и узнал историю города! Попробуй и ты — ' + window.location.href;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Тобольский квест',
+                    text: 'Я прошёл квест «Тайны Тобольска»!',
+                    url: window.location.href
+                }).catch(() => {
+                    fallbackCopy(shareText);
+                });
+            } else {
+                fallbackCopy(shareText);
+            }
+        }
+    });
+
+    function fallbackCopy(text) {
+        navigator.clipboard.writeText(text).then(() => {
+            const toast = document.getElementById('toastMsg');
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }).catch(() => {
+            alert('Скопируйте ссылку вручную: ' + window.location.href);
+        });
+    }
+</script>
+</body>
+</html>
