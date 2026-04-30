@@ -3,22 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Квест «Тайны Тобольска» — Рейтинг и баллы</title>
+    <title>Квест «Тайны Тобольска» — с подсказками после 3 ошибок</title>
     <style>
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
         body {
-            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
             background: #f5f0e8;
             margin: 0;
             padding: 20px;
             color: #2c2b28;
         }
-        .container {
-            max-width: 650px;
-            margin: 0 auto;
-        }
+        .container { max-width: 650px; margin: 0 auto; }
         .score-panel {
             background: #2c2b28;
             color: #ffd966;
@@ -63,12 +58,8 @@
             border: 1px solid #ccc;
             border-radius: 60px;
             margin: 10px 0;
-            background: white;
         }
-        input:disabled {
-            background: #f0f0f0;
-            color: #888;
-        }
+        input:disabled { background: #f0f0f0; color: #888; }
         button {
             background: #7a4c1a;
             color: white;
@@ -79,12 +70,8 @@
             font-weight: 600;
             cursor: pointer;
             width: 100%;
-            transition: 0.2s;
         }
-        button:disabled {
-            background: #b0a088;
-            cursor: not-allowed;
-        }
+        button:disabled { background: #b0a088; cursor: not-allowed; }
         .fact {
             background: #e9f0e6;
             padding: 14px;
@@ -128,10 +115,7 @@
             text-align: center;
             font-weight: bold;
         }
-        .share-btn {
-            background: #2c6e2c;
-            margin-top: 15px;
-        }
+        .share-btn { background: #2c6e2c; margin-top: 15px; }
         .toast {
             visibility: hidden;
             min-width: 200px;
@@ -149,14 +133,8 @@
             opacity: 0;
             transition: opacity 0.3s;
         }
-        .toast.show {
-            visibility: visible;
-            opacity: 0.95;
-        }
-        .trophy {
-            font-size: 80px;
-            margin: 20px 0;
-        }
+        .toast.show { visibility: visible; opacity: 0.95; }
+        .trophy { font-size: 80px; margin: 20px 0; }
     </style>
 </head>
 <body>
@@ -167,249 +145,103 @@
         <span>✅ Пройдено: <span id="completedCount">0</span>/10</span>
     </div>
     <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
-
     <div id="stepsContainer"></div>
     <div id="congrats" style="display:none;" class="final-message"></div>
     <div id="toastMsg" class="toast">📋 Скопировано в буфер!</div>
 </div>
 
 <script>
-    // Данные по точкам
+    // ===================== ДАННЫЕ КВЕСТА =====================
     const stepsData = [
-        { id: 1, title: "Пристань / Набережная", task: "Найди скульптуру или стенд у реки, связанный с основателем Сибири. Кто изображён верхом на коне?", riddle: "«Стрелой Иртыш я покорил, Хан Кучум бежал в испуге. Моя фамилия — ...»", correctAnswersPlain: ["ермак"], nextTask: "Поднимитесь в Софийский двор кремля. Найдите знак «Место основания Тобольска». В каком году заложен первый острог?" },
-        { id: 2, title: "Софийский собор (знак основания)", task: null, riddle: "«Четыре цифры: год рожденья града. Сложи их все до одного, но здесь введи число родное. 1+5+8+7 = ?»", correctAnswersPlain: ["1587","21"], nextTask: "Идите к Тюремному замку. Найдите фамилию знаменитого писателя-каторжанина." },
-        { id: 3, title: "Тюремный замок", task: null, riddle: "«Я создал роман про главного героя, здесь шёл путём на каторгу в ссылку. Моя фамилия всем вам знакома». Кто?", correctAnswersPlain: ["достоевский"], nextTask: "К Гостиному двору. Найдите плиту с римскими цифрами «XVIII век». Какое число это?" },
-        { id: 4, title: "Гостиный двор", task: null, riddle: "«XVIII римскими — какой век? Введи цифру!»", correctAnswersPlain: ["18","восемнадцать","18 век"], nextTask: "Перейдите к Рентерее (башня с часами). Герб города — какое животное в верхней части?" },
-        { id: 5, title: "Рентерея", task: null, riddle: "«Пушной зверёк, что целится из лука, гордость тайги, сибирская …»", correctAnswersPlain: ["соболь"], nextTask: "Памятник Семёну Ремезову. Кем он был? (одно слово)" },
-        { id: 6, title: "Памятник Семёну Ремезову", task: null, riddle: "«Не художник, не строитель, но чертил он всю Сибирь. Творец атласа, древний …»", correctAnswersPlain: ["картограф","чертёжник"], nextTask: "Дом Корнилова (ул. Октябрьская, 2). Фамилия купцов-меценатов." },
-        { id: 7, title: "Дом Корнилова", task: null, riddle: "«Первое электричество в Сибири, мрамор, пароходы. Чья это династия?»", correctAnswersPlain: ["корниловы"], nextTask: "Памятник Менделееву. Год установки — 1984. Введите последнюю цифру." },
-        { id: 8, title: "Памятник Менделееву", task: null, riddle: "«Год стоит: 1984. Цифра последняя — открой секрет.»", correctAnswersPlain: ["4","четыре"], nextTask: "Памятник воинам-сибирякам. Какое оружие в руках у фигуры?" },
-        { id: 9, title: "Памятник воинам-сибирякам", task: null, riddle: "«В руке железный клинок, защитника символ. Назови оружие одним словом.»", correctAnswersPlain: ["меч","шпага","сабля"], nextTask: "Дом губернатора. Фамилия декабриста в ссылке." },
-        { id: 10, title: "Дом губернатора", task: null, riddle: "«Басаргин или Муравьёв — Укажет точно мемориал. Введи фамилию»", correctAnswersPlain: ["басаргин","муравьев-апостол","басаргина"], nextTask: null }
+        { title: "Пристань / Набережная", task: "Найди скульптуру или стенд у реки, связанный с основателем Сибири. Кто изображён верхом на коне?", riddle: "«Стрелой Иртыш я покорил, Хан Кучум бежал в испуге. Моя фамилия — ...»", correct: ["ермак"], nextTask: "Поднимитесь в Софийский двор кремля. Найдите знак «Место основания Тобольска». В каком году заложен первый острог?" },
+        { title: "Софийский собор (знак основания)", task: null, riddle: "«Четыре цифры: год рожденья града. Сложи их все до одного, но здесь введи число родное. 1+5+8+7 = ?»", correct: ["1587","21"], nextTask: "Идите к Тюремному замку. Найдите фамилию знаменитого писателя-каторжанина." },
+        { title: "Тюремный замок", task: null, riddle: "«Я создал роман про главного героя, здесь шёл путём на каторгу в ссылку. Моя фамилия всем вам знакома». Кто?", correct: ["достоевский"], nextTask: "К Гостиному двору. Найдите плиту с римскими цифрами «XVIII век». Какое число это?" },
+        { title: "Гостиный двор", task: null, riddle: "«XVIII римскими — какой век? Введи цифру!»", correct: ["18","восемнадцать","18 век"], nextTask: "Перейдите к Рентерее (башня с часами). Герб города — какое животное в верхней части?" },
+        { title: "Рентерея", task: null, riddle: "«Пушной зверёк, что целится из лука, гордость тайги, сибирская …»", correct: ["соболь"], nextTask: "Памятник Семёну Ремезову. Кем он был? (одно слово)" },
+        { title: "Памятник Семёну Ремезову", task: null, riddle: "«Не художник, не строитель, но чертил он всю Сибирь. Творец атласа, древний …»", correct: ["картограф","чертёжник"], nextTask: "Дом Корнилова (ул. Октябрьская, 2). Фамилия купцов-меценатов." },
+        { title: "Дом Корнилова", task: null, riddle: "«Первое электричество в Сибири, мрамор, пароходы. Чья это династия?»", correct: ["корниловы"], nextTask: "Памятник Менделееву. Год установки — 1984. Введите последнюю цифру." },
+        { title: "Памятник Менделееву", task: null, riddle: "«Год стоит: 1984. Цифра последняя — открой секрет.»", correct: ["4","четыре"], nextTask: "Памятник воинам-сибирякам. Какое оружие в руках у фигуры?" },
+        { title: "Памятник воинам-сибирякам", task: null, riddle: "«В руке железный клинок, защитника символ. Назови оружие одним словом.»", correct: ["меч","шпага","сабля"], nextTask: "Дом губернатора. Фамилия декабриста в ссылке." },
+        { title: "Дом губернатора", task: null, riddle: "«Басаргин или Муравьёв — Укажет точно мемориал. Введи фамилию»", correct: ["басаргин","муравьев-апостол","басаргина"], nextTask: null }
     ];
 
     const facts = {
-        1: 'Ермак Тимофеевич начал освоение Сибири в 1582 году.',
-        2: 'Тобольск основан в 1587 году отрядом Данилы Чулкова.',
-        3: 'Достоевскому в Тобольске подарили Евангелие на всю жизнь.',
-        4: 'Гостиный двор — единственный каменный торговый двор XVIII века в Сибири.',
-        5: 'Соболь на гербе — символ пушного богатства Сибири.',
-        6: 'Семён Ремезов — создатель первого атласа Сибири.',
-        7: 'Дом Корниловых — первый в Сибири с электричеством и водопроводом.',
-        8: 'Менделеев родился в Тобольске в 1834 году.',
-        9: 'Сибиряки — гордость русской армии.',
-        10: 'Декабристы создали в Тобольске литературный кружок.'
+        0: 'Ермак Тимофеевич начал освоение Сибири в 1582 году.',
+        1: 'Тобольск основан в 1587 году отрядом Данилы Чулкова.',
+        2: 'Достоевскому в Тобольске подарили Евангелие на всю жизнь.',
+        3: 'Гостиный двор — единственный каменный торговый двор XVIII века в Сибири.',
+        4: 'Соболь на гербе — символ пушного богатства Сибири.',
+        5: 'Семён Ремезов — создатель первого атласа Сибири.',
+        6: 'Дом Корниловых — первый в Сибири с электричеством и водопроводом.',
+        7: 'Менделеев родился в Тобольске в 1834 году.',
+        8: 'Сибиряки — гордость русской армии.',
+        9: 'Декабристы создали в Тобольске литературный кружок.'
     };
 
-    let state = {
-        currentStep: 0,
-        scores: Array(10).fill(0),
-        attempts: Array(10).fill(0),
-        completed: Array(10).fill(false),
-        shownHint: Array(10).fill(false),
-        totalScore: 0
-    };
+    // Состояние
+    let currentQuestionIndex = 0;          // 0..9
+    let scores = Array(10).fill(0);
+    let attempts = Array(10).fill(0);
+    let completed = Array(10).fill(false);
+    let hintShown = Array(10).fill(false);
+    let totalScore = 0;
+
+    // DOM элементы будут созданы динамически
+    let stepsContainer, totalScoreSpan, completedCountSpan, progressBar, congratsDiv;
 
     function saveState() {
-        localStorage.setItem('questState', JSON.stringify(state));
+        const state = { currentQuestionIndex, scores, attempts, completed, hintShown, totalScore };
+        localStorage.setItem('tobolsk_quest', JSON.stringify(state));
     }
 
     function loadState() {
-        const saved = localStorage.getItem('questState');
+        const saved = localStorage.getItem('tobolsk_quest');
         if (saved) {
             try {
-                const parsed = JSON.parse(saved);
-                if (parsed.scores && parsed.scores.length === 10) state = parsed;
+                const s = JSON.parse(saved);
+                currentQuestionIndex = s.currentQuestionIndex;
+                scores = s.scores;
+                attempts = s.attempts;
+                completed = s.completed;
+                hintShown = s.hintShown;
+                totalScore = s.totalScore;
             } catch(e) {}
         }
         updateStatsAndProgress();
-        renderInitialSteps();
-        // Если есть пройденные вопросы, показываем подсказки для них
-        for (let i = 0; i < state.completed.length; i++) {
-            if (state.completed[i] && state.shownHint[i]) {
-                const hintDiv = document.getElementById(`hint${i+1}`);
-                if (hintDiv) {
-                    hintDiv.innerHTML = `💡 <strong>Подсказка:</strong> Правильный ответ: ${stepsData[i].correctAnswersPlain[0]}. Вы получили 0 баллов.`;
-                    hintDiv.style.display = 'block';
-                }
-            }
-        }
     }
 
     function updateStatsAndProgress() {
-        document.getElementById('totalScore').innerText = state.totalScore;
-        const completedCount = state.completed.filter(c => c === true).length;
-        document.getElementById('completedCount').innerText = `${completedCount}/10`;
-        const percent = (completedCount / 10) * 100;
-        document.getElementById('progressBar').style.width = percent + "%";
-        if (completedCount === 10) showFinalScreen();
-        saveState();
-    }
-
-    function renderInitialSteps() {
-        const container = document.getElementById('stepsContainer');
-        container.innerHTML = '';
-        for (let i = 0; i < stepsData.length; i++) {
-            const step = stepsData[i];
-            const isCompleted = state.completed[i];
-            const isCurrent = (i === state.currentStep);
-            // Показываем все не пройденные, начиная с текущего, и пройденные только если они ранее были показаны
-            if (isCompleted && i < state.currentStep) continue; // скрываем старые пройденные
-            if (!isCompleted && i > state.currentStep) continue; // не показываем будущие
-            
-            const stepDiv = document.createElement('div');
-            stepDiv.className = 'step';
-            stepDiv.id = `step${i+1}`;
-            stepDiv.innerHTML = `
-                <div class="step-header">📍 Точка ${i+1}. ${step.title}</div>
-                ${step.task ? `<div class="task"><strong>👣 Задание:</strong> ${step.task}</div>` : ''}
-                <div class="riddle">${step.riddle}</div>
-                <input type="text" id="ans${i+1}" placeholder="Введите ответ" ${isCompleted ? 'disabled' : ''} autocomplete="off">
-                <button id="btn${i+1}" ${isCompleted ? 'disabled' : ''}>Проверить</button>
-                <div id="hint${i+1}" class="hint"></div>
-                <div id="fact${i+1}" class="fact"></div>
-                ${isCompleted && i+1 < stepsData.length ? `<div class="task">✅ <strong>Далее:</strong> ${stepsData[i].nextTask}</div>` : ''}
-            `;
-            container.appendChild(stepDiv);
-            
-            if (!isCompleted) {
-                const btn = document.getElementById(`btn${i+1}`);
-                const input = document.getElementById(`ans${i+1}`);
-                btn.onclick = () => checkAnswer(i);
-                input.onkeypress = (e) => { if(e.key === 'Enter') checkAnswer(i); };
-            }
-        }
-    }
-
-    function completeStep(stepIdx, points, fromHint = false) {
-        if (state.completed[stepIdx]) return;
-        
-        state.scores[stepIdx] = points;
-        state.totalScore += points;
-        state.completed[stepIdx] = true;
-        state.currentStep = stepIdx + 1;
-        
-        // Блокируем поля ввода и кнопку на текущем шаге
-        const inputElem = document.getElementById(`ans${stepIdx+1}`);
-        const btnElem = document.getElementById(`btn${stepIdx+1}`);
-        if (inputElem) inputElem.disabled = true;
-        if (btnElem) btnElem.disabled = true;
-        
-        // Показываем историческую справку
-        const factDiv = document.getElementById(`fact${stepIdx+1}`);
-        if (fromHint) {
-            factDiv.innerHTML = `<strong>📜 Историческая справка:</strong> ${facts[stepIdx+1]} <br> ⚠️ Использована подсказка — 0 баллов.`;
-        } else {
-            factDiv.innerHTML = `<strong>📜 Историческая справка:</strong> ${facts[stepIdx+1]} <br> +${points} балла(ов) за ответ.`;
-        }
-        factDiv.style.display = 'block';
-        
-        // Добавляем задание на следующий шаг, если есть
-        if (stepIdx + 1 < stepsData.length) {
-            const stepDiv = document.getElementById(`step${stepIdx+1}`);
-            const nextTaskDiv = document.createElement('div');
-            nextTaskDiv.className = 'task';
-            nextTaskDiv.innerHTML = `✅ <strong>Далее:</strong> ${stepsData[stepIdx].nextTask}`;
-            if (!stepDiv.querySelector('.task:last-of-type')) {
-                stepDiv.appendChild(nextTaskDiv);
-            }
-        }
-        
-        updateStatsAndProgress();
-        
-        // Если есть следующий шаг, показываем его (он уже скрыт, нужно отобразить)
-        if (stepIdx + 1 < stepsData.length && !state.completed[stepIdx+1]) {
-            const nextStepDiv = document.getElementById(`step${stepIdx+2}`);
-            if (nextStepDiv) nextStepDiv.style.display = 'block';
-            else {
-                // Если следующий шаг ещё не создан в DOM, перерисовываем всё (но это только один раз)
-                renderInitialSteps();
-            }
-        }
-    }
-
-    function checkAnswer(stepIdx) {
-        if (state.completed[stepIdx]) return;
-        
-        const step = stepsData[stepIdx];
-        const inputElem = document.getElementById(`ans${stepIdx+1}`);
-        const userAnswer = inputElem.value.trim().toLowerCase().replace(/[^а-яё0-9]/gi, '');
-        const isCorrect = step.correctAnswersPlain.some(corr => {
-            const cleanCorr = corr.toString().toLowerCase().replace(/[^а-яё0-9]/gi, '');
-            return userAnswer === cleanCorr;
-        });
-        
-        const currentAttempt = state.attempts[stepIdx] + 1;
-        state.attempts[stepIdx] = currentAttempt;
-        
-        // Если подсказка уже была показана
-        if (state.shownHint[stepIdx]) {
-            const factDiv = document.getElementById(`fact${stepIdx+1}`);
-            factDiv.innerHTML = `❌ Этот вопрос уже закрыт с 0 баллов. Переходите к следующему.`;
-            factDiv.style.display = 'block';
-            factDiv.style.background = '#ffe0e0';
-            setTimeout(() => {
-                factDiv.style.display = 'none';
-                factDiv.style.background = '';
-            }, 2000);
-            return;
-        }
-        
-        if (isCorrect) {
-            let points = 0;
-            if (currentAttempt === 1) points = 3;
-            else if (currentAttempt === 2) points = 2;
-            else if (currentAttempt === 3) points = 1;
-            else points = 0;
-            completeStep(stepIdx, points, false);
-        } else {
-            if (currentAttempt >= 3) {
-                // Третья ошибка — показываем подсказку
-                state.shownHint[stepIdx] = true;
-                const hintDiv = document.getElementById(`hint${stepIdx+1}`);
-                hintDiv.innerHTML = `💡 <strong>Подсказка:</strong> Правильный ответ: ${step.correctAnswersPlain[0]}. Вы получаете 0 баллов за этот вопрос.`;
-                hintDiv.style.display = 'block';
-                completeStep(stepIdx, 0, true);
-            } else {
-                const factDiv = document.getElementById(`fact${stepIdx+1}`);
-                factDiv.innerHTML = `❌ Неверно. Осталось попыток: ${3 - currentAttempt}. Попробуйте ещё!`;
-                factDiv.style.display = 'block';
-                factDiv.style.background = '#ffe0e0';
-                setTimeout(() => {
-                    factDiv.style.display = 'none';
-                    factDiv.style.background = '';
-                }, 2000);
-            }
-        }
+        totalScoreSpan.innerText = totalScore;
+        const compCount = completed.filter(c => c === true).length;
+        completedCountSpan.innerText = `${compCount}/10`;
+        const percent = (compCount / 10) * 100;
+        progressBar.style.width = percent + "%";
+        if (compCount === 10) showFinalScreen();
         saveState();
     }
 
     function showFinalScreen() {
-        const maxScore = 10 * 3;
-        const finalScore = state.totalScore;
-        const congratsDiv = document.getElementById('congrats');
-        
+        const maxScore = 30;
+        if (congratsDiv.style.display === 'block') return;
         let trophyHtml = '';
         let message = '';
-        if (finalScore === maxScore) {
+        if (totalScore === maxScore) {
             trophyHtml = '<div class="trophy">🏆✨ ЗОЛОТОЙ КУБОК ✨🏆</div>';
             message = '<strong>🎉 ПОЗДРАВЛЯЕМ !! 🎉</strong><br>👏👏👏 Вы супер эрудит и знаток города! 👏👏👏';
         } else {
             trophyHtml = '<div class="trophy">⭐🏅⭐</div>';
-            message = `<strong>Квест пройден!</strong><br>Вы набрали ${finalScore} баллов из ${maxScore}.<br>Отличный результат, но в следующий раз попробуйте получить все 3 балла за каждый вопрос!`;
+            message = `<strong>Квест пройден!</strong><br>Вы набрали ${totalScore} баллов из ${maxScore}.<br>Отличный результат, но в следующий раз попробуйте получить все 3 балла за каждый вопрос!`;
         }
-        
         congratsDiv.innerHTML = `
             ${trophyHtml}
             ${message}
             <br><br>
-            <button id="shareResultsBtn" class="share-btn">📤 Поделиться результатами (${finalScore}/${maxScore})</button>
+            <button id="shareResultsBtn" class="share-btn">📤 Поделиться результатами (${totalScore}/${maxScore})</button>
             <button id="resetBtn" style="background:#7a4c1a; margin-top:10px;">🔄 Пройти квест заново</button>
         `;
         congratsDiv.style.display = 'block';
-        
         document.getElementById('shareResultsBtn')?.addEventListener('click', () => {
-            const shareText = `Я прошёл квест «Тайны Тобольска» и набрал ${finalScore} из ${maxScore} баллов! Попробуй и ты — ${window.location.href}`;
+            const shareText = `Я прошёл квест «Тайны Тобольска» и набрал ${totalScore} из ${maxScore} баллов! Попробуй и ты — ${window.location.href}`;
             if (navigator.share) {
                 navigator.share({ title: 'Тобольский квест', text: shareText });
             } else {
@@ -419,18 +251,176 @@
                 setTimeout(() => toast.classList.remove('show'), 2000);
             }
         });
-        
         document.getElementById('resetBtn')?.addEventListener('click', () => {
-            localStorage.removeItem('questState');
+            localStorage.removeItem('tobolsk_quest');
             location.reload();
         });
     }
 
-    // Инициализация
-    loadState();
-    if (!state.completed.some(v => v === true) && state.totalScore === 0) {
-        renderInitialSteps();
+    function moveToNextQuestion() {
+        if (currentQuestionIndex + 1 < stepsData.length) {
+            currentQuestionIndex++;
+            renderCurrentQuestion();
+        } else {
+            // Все вопросы已回答
+            if (completed.every(c => c === true)) showFinalScreen();
+            else renderCurrentQuestion();
+        }
+        updateStatsAndProgress();
     }
+
+    function checkAnswer() {
+        const idx = currentQuestionIndex;
+        if (completed[idx]) return;
+
+        const step = stepsData[idx];
+        const inputEl = document.getElementById('answerInput');
+        const userAnswer = inputEl.value.trim().toLowerCase().replace(/[^а-яё0-9]/gi, '');
+        const isCorrect = step.correct.some(corr => {
+            const clean = corr.toString().toLowerCase().replace(/[^а-яё0-9]/gi, '');
+            return userAnswer === clean;
+        });
+
+        const currentAttempt = attempts[idx] + 1;
+        attempts[idx] = currentAttempt;
+
+        // Если уже показали подсказку (значит вопрос закрыт с 0 баллов)
+        if (hintShown[idx]) {
+            const factDiv = document.getElementById('factMessage');
+            factDiv.innerHTML = `❌ Этот вопрос уже закрыт с 0 баллов. Переходите к следующему.`;
+            factDiv.style.display = 'block';
+            factDiv.style.background = '#ffe0e0';
+            setTimeout(() => { factDiv.style.display = 'none'; factDiv.style.background = ''; }, 2000);
+            return;
+        }
+
+        if (isCorrect) {
+            let points = 0;
+            if (currentAttempt === 1) points = 3;
+            else if (currentAttempt === 2) points = 2;
+            else if (currentAttempt === 3) points = 1;
+            else points = 0;
+
+            scores[idx] = points;
+            totalScore += points;
+            completed[idx] = true;
+            updateStatsAndProgress();
+
+            // Показать историческую справку
+            const factDiv = document.getElementById('factMessage');
+            factDiv.innerHTML = `<strong>📜 Историческая справка:</strong> ${facts[idx]} <br> +${points} балла(ов) за ответ.`;
+            factDiv.style.display = 'block';
+            document.getElementById('checkBtn').disabled = true;
+            document.getElementById('answerInput').disabled = true;
+
+            // Показать задание на следующий шаг
+            if (step.nextTask) {
+                const nextTaskDiv = document.getElementById('nextTaskMessage');
+                nextTaskDiv.innerHTML = `✅ <strong>Далее:</strong> ${step.nextTask}`;
+                nextTaskDiv.style.display = 'block';
+            }
+            // Кнопка "Далее"
+            document.getElementById('nextBtn').style.display = 'block';
+        } else {
+            // Неправильный ответ
+            if (currentAttempt >= 3) {
+                // Третья ошибка – показываем подсказку и закрываем вопрос с 0 баллов
+                hintShown[idx] = true;
+                const hintDiv = document.getElementById('hintMessage');
+                hintDiv.innerHTML = `💡 <strong>Подсказка:</strong> Правильный ответ: ${step.correct[0]}. Вы получаете 0 баллов за этот вопрос.`;
+                hintDiv.style.display = 'block';
+
+                scores[idx] = 0;
+                totalScore += 0;
+                completed[idx] = true;
+                updateStatsAndProgress();
+
+                const factDiv = document.getElementById('factMessage');
+                factDiv.innerHTML = `<strong>📜 Историческая справка:</strong> ${facts[idx]} <br> ⚠️ Использована подсказка — 0 баллов.`;
+                factDiv.style.display = 'block';
+                document.getElementById('checkBtn').disabled = true;
+                document.getElementById('answerInput').disabled = true;
+
+                if (step.nextTask) {
+                    const nextTaskDiv = document.getElementById('nextTaskMessage');
+                    nextTaskDiv.innerHTML = `✅ <strong>Далее:</strong> ${step.nextTask}`;
+                    nextTaskDiv.style.display = 'block';
+                }
+                document.getElementById('nextBtn').style.display = 'block';
+            } else {
+                const factDiv = document.getElementById('factMessage');
+                factDiv.innerHTML = `❌ Неверно. Осталось попыток: ${3 - currentAttempt}. Попробуйте ещё!`;
+                factDiv.style.display = 'block';
+                factDiv.style.background = '#ffe0e0';
+                setTimeout(() => {
+                    if (factDiv.style.display === 'block') {
+                        factDiv.style.display = 'none';
+                        factDiv.style.background = '';
+                    }
+                }, 2000);
+            }
+        }
+        saveState();
+    }
+
+    function renderCurrentQuestion() {
+        stepsContainer.innerHTML = '';
+        const idx = currentQuestionIndex;
+        const step = stepsData[idx];
+        const isCompleted = completed[idx];
+        const stepDiv = document.createElement('div');
+        stepDiv.className = 'step';
+        stepDiv.innerHTML = `
+            <div class="step-header">📍 Точка ${idx+1}. ${step.title}</div>
+            ${step.task ? `<div class="task"><strong>👣 Задание:</strong> ${step.task}</div>` : ''}
+            <div class="riddle">${step.riddle}</div>
+            <input type="text" id="answerInput" placeholder="Введите ответ" ${isCompleted ? 'disabled' : ''} autocomplete="off">
+            <button id="checkBtn" ${isCompleted ? 'disabled' : ''}>Проверить</button>
+            <div id="hintMessage" class="hint"></div>
+            <div id="factMessage" class="fact"></div>
+            <div id="nextTaskMessage" class="task" style="display:none;"></div>
+            <button id="nextBtn" style="display:none; background:#2c6e2c;">➡️ Следующий вопрос</button>
+        `;
+        stepsContainer.appendChild(stepDiv);
+
+        // Если вопрос уже завершён с подсказкой, показываем подсказку повторно
+        if (isCompleted && hintShown[idx]) {
+            const hintDiv = document.getElementById('hintMessage');
+            hintDiv.innerHTML = `💡 <strong>Подсказка:</strong> Правильный ответ: ${step.correct[0]}. Вы получили 0 баллов.`;
+            hintDiv.style.display = 'block';
+            const factDiv = document.getElementById('factMessage');
+            factDiv.innerHTML = `<strong>📜 Историческая справка:</strong> ${facts[idx]} <br> ⚠️ Использована подсказка — 0 баллов.`;
+            factDiv.style.display = 'block';
+        }
+
+        if (!isCompleted) {
+            document.getElementById('checkBtn').onclick = () => checkAnswer();
+            document.getElementById('answerInput').onkeypress = (e) => { if(e.key === 'Enter') checkAnswer(); };
+        }
+        document.getElementById('nextBtn').onclick = () => {
+            moveToNextQuestion();
+        };
+        // Если вопрос уже пройден, показываем кнопку "Далее"
+        if (isCompleted && idx+1 < stepsData.length) {
+            document.getElementById('nextBtn').style.display = 'block';
+            const nextTaskDiv = document.getElementById('nextTaskMessage');
+            nextTaskDiv.innerHTML = `✅ <strong>Далее:</strong> ${step.nextTask}`;
+            nextTaskDiv.style.display = 'block';
+        } else if (isCompleted && idx+1 === stepsData.length) {
+            showFinalScreen();
+        }
+    }
+
+    // Инициализация
+    document.addEventListener('DOMContentLoaded', () => {
+        stepsContainer = document.getElementById('stepsContainer');
+        totalScoreSpan = document.getElementById('totalScore');
+        completedCountSpan = document.getElementById('completedCount');
+        progressBar = document.getElementById('progressBar');
+        congratsDiv = document.getElementById('congrats');
+        loadState();
+        renderCurrentQuestion();
+    });
 </script>
 </body>
 </html>
