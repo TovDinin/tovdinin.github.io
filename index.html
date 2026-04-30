@@ -206,7 +206,7 @@
         scores: Array(10).fill(0),
         attempts: Array(10).fill(0),
         completed: Array(10).fill(false),
-        shownHint: Array(10).fill(false),  // показывали ли подсказку?
+        shownHint: Array(10).fill(false),
         totalScore: 0
     };
 
@@ -222,30 +222,40 @@
                 if (parsed.scores && parsed.scores.length === 10) state = parsed;
             } catch(e) {}
         }
-        updateUI();
+        updateStatsAndProgress();
+        renderInitialSteps();
+        // Если есть пройденные вопросы, показываем подсказки для них
+        for (let i = 0; i < state.completed.length; i++) {
+            if (state.completed[i] && state.shownHint[i]) {
+                const hintDiv = document.getElementById(`hint${i+1}`);
+                if (hintDiv) {
+                    hintDiv.innerHTML = `💡 <strong>Подсказка:</strong> Правильный ответ: ${stepsData[i].correctAnswersPlain[0]}. Вы получили 0 баллов.`;
+                    hintDiv.style.display = 'block';
+                }
+            }
+        }
     }
 
-    function updateUI() {
+    function updateStatsAndProgress() {
         document.getElementById('totalScore').innerText = state.totalScore;
         const completedCount = state.completed.filter(c => c === true).length;
         document.getElementById('completedCount').innerText = `${completedCount}/10`;
         const percent = (completedCount / 10) * 100;
         document.getElementById('progressBar').style.width = percent + "%";
-        
-        renderSteps();
-        if (state.completed.every(v => v === true)) showFinalScreen();
+        if (completedCount === 10) showFinalScreen();
         saveState();
     }
 
-    function renderSteps() {
+    function renderInitialSteps() {
         const container = document.getElementById('stepsContainer');
         container.innerHTML = '';
         for (let i = 0; i < stepsData.length; i++) {
             const step = stepsData[i];
             const isCompleted = state.completed[i];
-            // Показываем только текущий или будущие, но не пройденные (кроме текущего)
-            if (isCompleted && i !== state.currentStep && i < state.currentStep) continue;
-            if (!isCompleted && i > state.currentStep) continue;
+            const isCurrent = (i === state.currentStep);
+            // Показываем все не пройденные, начиная с текущего, и пройденные только если они ранее были показаны
+            if (isCompleted && i < state.currentStep) continue; // скрываем старые пройденные
+            if (!isCompleted && i > state.currentStep) continue; // не показываем будущие
             
             const stepDiv = document.createElement('div');
             stepDiv.className = 'step';
@@ -254,35 +264,24 @@
                 <div class="step-header">📍 Точка ${i+1}. ${step.title}</div>
                 ${step.task ? `<div class="task"><strong>👣 Задание:</strong> ${step.task}</div>` : ''}
                 <div class="riddle">${step.riddle}</div>
-                <input type="text" id="ans${i+1}" placeholder="Введите ответ" ${state.completed[i] ? 'disabled' : ''} autocomplete="off">
-                <button id="btn${i+1}" ${state.completed[i] ? 'disabled' : ''}>Проверить</button>
+                <input type="text" id="ans${i+1}" placeholder="Введите ответ" ${isCompleted ? 'disabled' : ''} autocomplete="off">
+                <button id="btn${i+1}" ${isCompleted ? 'disabled' : ''}>Проверить</button>
                 <div id="hint${i+1}" class="hint"></div>
                 <div id="fact${i+1}" class="fact"></div>
-                ${state.completed[i] && i+1 < stepsData.length ? `<div class="task">✅ <strong>Далее:</strong> ${stepsData[i].nextTask}</div>` : ''}
+                ${isCompleted && i+1 < stepsData.length ? `<div class="task">✅ <strong>Далее:</strong> ${stepsData[i].nextTask}</div>` : ''}
             `;
             container.appendChild(stepDiv);
             
-            // Если вопрос уже завершён с подсказкой, показываем её снова
-            if (state.completed[i] && state.shownHint[i]) {
-                const hintDiv = document.getElementById(`hint${i+1}`);
-                if (hintDiv) {
-                    hintDiv.innerHTML = `💡 <strong>Подсказка:</strong> Правильный ответ: ${step.correctAnswersPlain[0]}. Вы получили 0 баллов.`;
-                    hintDiv.style.display = 'block';
-                }
-            }
-            
-            if (!state.completed[i]) {
+            if (!isCompleted) {
                 const btn = document.getElementById(`btn${i+1}`);
                 const input = document.getElementById(`ans${i+1}`);
-                if (btn && input) {
-                    btn.onclick = () => checkAnswer(i);
-                    input.onkeypress = (e) => { if(e.key === 'Enter') checkAnswer(i); };
-                }
+                btn.onclick = () => checkAnswer(i);
+                input.onkeypress = (e) => { if(e.key === 'Enter') checkAnswer(i); };
             }
         }
     }
 
-    function completeStep(stepIdx, points, showHintMessage = false, correctAnswerText = '') {
+    function completeStep(stepIdx, points, fromHint = false) {
         if (state.completed[stepIdx]) return;
         
         state.scores[stepIdx] = points;
@@ -290,20 +289,43 @@
         state.completed[stepIdx] = true;
         state.currentStep = stepIdx + 1;
         
+        // Блокируем поля ввода и кнопку на текущем шаге
+        const inputElem = document.getElementById(`ans${stepIdx+1}`);
+        const btnElem = document.getElementById(`btn${stepIdx+1}`);
+        if (inputElem) inputElem.disabled = true;
+        if (btnElem) btnElem.disabled = true;
+        
+        // Показываем историческую справку
         const factDiv = document.getElementById(`fact${stepIdx+1}`);
-        if (showHintMessage) {
+        if (fromHint) {
             factDiv.innerHTML = `<strong>📜 Историческая справка:</strong> ${facts[stepIdx+1]} <br> ⚠️ Использована подсказка — 0 баллов.`;
         } else {
             factDiv.innerHTML = `<strong>📜 Историческая справка:</strong> ${facts[stepIdx+1]} <br> +${points} балла(ов) за ответ.`;
         }
         factDiv.style.display = 'block';
         
-        const inputElem = document.getElementById(`ans${stepIdx+1}`);
-        const btnElem = document.getElementById(`btn${stepIdx+1}`);
-        if (inputElem) inputElem.disabled = true;
-        if (btnElem) btnElem.disabled = true;
+        // Добавляем задание на следующий шаг, если есть
+        if (stepIdx + 1 < stepsData.length) {
+            const stepDiv = document.getElementById(`step${stepIdx+1}`);
+            const nextTaskDiv = document.createElement('div');
+            nextTaskDiv.className = 'task';
+            nextTaskDiv.innerHTML = `✅ <strong>Далее:</strong> ${stepsData[stepIdx].nextTask}`;
+            if (!stepDiv.querySelector('.task:last-of-type')) {
+                stepDiv.appendChild(nextTaskDiv);
+            }
+        }
         
-        updateUI(); // перерисовка, но подсказка уже будет восстановлена через state.shownHint
+        updateStatsAndProgress();
+        
+        // Если есть следующий шаг, показываем его (он уже скрыт, нужно отобразить)
+        if (stepIdx + 1 < stepsData.length && !state.completed[stepIdx+1]) {
+            const nextStepDiv = document.getElementById(`step${stepIdx+2}`);
+            if (nextStepDiv) nextStepDiv.style.display = 'block';
+            else {
+                // Если следующий шаг ещё не создан в DOM, перерисовываем всё (но это только один раз)
+                renderInitialSteps();
+            }
+        }
     }
 
     function checkAnswer(stepIdx) {
@@ -317,21 +339,18 @@
             return userAnswer === cleanCorr;
         });
         
-        // Увеличиваем счётчик попыток
         const currentAttempt = state.attempts[stepIdx] + 1;
         state.attempts[stepIdx] = currentAttempt;
         
-        // Если подсказка уже была показана (т.е. 3 ошибки уже случились на этом вопросе)
+        // Если подсказка уже была показана
         if (state.shownHint[stepIdx]) {
             const factDiv = document.getElementById(`fact${stepIdx+1}`);
             factDiv.innerHTML = `❌ Этот вопрос уже закрыт с 0 баллов. Переходите к следующему.`;
             factDiv.style.display = 'block';
             factDiv.style.background = '#ffe0e0';
             setTimeout(() => {
-                if(factDiv.style.display === 'block') {
-                    factDiv.style.display = 'none';
-                    factDiv.style.background = '';
-                }
+                factDiv.style.display = 'none';
+                factDiv.style.background = '';
             }, 2000);
             return;
         }
@@ -342,29 +361,23 @@
             else if (currentAttempt === 2) points = 2;
             else if (currentAttempt === 3) points = 1;
             else points = 0;
-            
             completeStep(stepIdx, points, false);
         } else {
-            // Неправильный ответ
             if (currentAttempt >= 3) {
-                // Третья ошибка — показываем подсказку прямо сейчас, не дожидаясь перерисовки
+                // Третья ошибка — показываем подсказку
                 state.shownHint[stepIdx] = true;
                 const hintDiv = document.getElementById(`hint${stepIdx+1}`);
                 hintDiv.innerHTML = `💡 <strong>Подсказка:</strong> Правильный ответ: ${step.correctAnswersPlain[0]}. Вы получаете 0 баллов за этот вопрос.`;
                 hintDiv.style.display = 'block';
-                
-                // Завершаем вопрос с 0 баллов и флагом, что была подсказка
-                completeStep(stepIdx, 0, true, step.correctAnswersPlain[0]);
+                completeStep(stepIdx, 0, true);
             } else {
                 const factDiv = document.getElementById(`fact${stepIdx+1}`);
                 factDiv.innerHTML = `❌ Неверно. Осталось попыток: ${3 - currentAttempt}. Попробуйте ещё!`;
                 factDiv.style.display = 'block';
                 factDiv.style.background = '#ffe0e0';
                 setTimeout(() => {
-                    if(factDiv.style.display === 'block') {
-                        factDiv.style.display = 'none';
-                        factDiv.style.background = '';
-                    }
+                    factDiv.style.display = 'none';
+                    factDiv.style.background = '';
                 }, 2000);
             }
         }
@@ -416,7 +429,7 @@
     // Инициализация
     loadState();
     if (!state.completed.some(v => v === true) && state.totalScore === 0) {
-        renderSteps();
+        renderInitialSteps();
     }
 </script>
 </body>
