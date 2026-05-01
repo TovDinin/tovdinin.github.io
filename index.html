@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Квест «Тайны Тобольска» — с подсказками после 3 ошибок</title>
+    <title>Квест «Тайны Тобольска» — поддержка AI и языки</title>
     <style>
         * { box-sizing: border-box; }
         body {
@@ -12,6 +12,7 @@
             margin: 0;
             padding: 20px;
             color: #2c2b28;
+            padding-bottom: 80px;
         }
         .container { max-width: 650px; margin: 0 auto; }
         .score-panel {
@@ -22,8 +23,28 @@
             display: flex;
             justify-content: space-between;
             font-weight: bold;
-            margin-bottom: 20px;
+            margin-bottom: 12px;
             font-size: 1.1rem;
+        }
+        .lang-bar {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .lang-btn {
+            background: #e2d8cc;
+            border: none;
+            border-radius: 30px;
+            padding: 6px 14px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 14px;
+            transition: 0.2s;
+        }
+        .lang-btn.active {
+            background: #b8860b;
+            color: white;
         }
         .step {
             background: white;
@@ -101,7 +122,7 @@
             background: #ddd6cc;
             border-radius: 40px;
             height: 8px;
-            margin: 25px 0 15px;
+            margin: 15px 0;
         }
         .progress-bar {
             background: #b8860b;
@@ -137,7 +158,7 @@
         .toast.show { visibility: visible; opacity: 0.95; }
         .trophy { font-size: 80px; margin: 20px 0; }
 
-        /* Информационное окно в начале */
+        /* intro overlay */
         .intro-overlay {
             position: fixed;
             top: 0;
@@ -161,20 +182,117 @@
             box-shadow: 0 20px 40px rgba(0,0,0,0.3);
             border-top: 8px solid #b8860b;
         }
-        .intro-card h2 { margin-top: 0; color: #7a4c1a; }
-        .intro-card hr { margin: 16px 0; border-color: #e2d8cc; }
         .close-intro {
             background: #7a4c1a;
             margin-top: 20px;
+        }
+
+        /* AI-помощник (чат) */
+        .ai-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #b8860b;
+            color: white;
+            font-size: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 1500;
+            border: none;
+        }
+        .chat-modal {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 300px;
+            max-width: calc(100% - 40px);
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            z-index: 1501;
+            display: none;
+            flex-direction: column;
+            border: 1px solid #e2d8cc;
+            overflow: hidden;
+        }
+        .chat-header {
+            background: #7a4c1a;
+            color: white;
+            padding: 12px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .chat-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            width: auto;
+        }
+        .chat-messages {
+            height: 250px;
+            overflow-y: auto;
+            padding: 10px;
+            background: #fef7e0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .message {
+            max-width: 85%;
+            padding: 8px 12px;
+            border-radius: 18px;
+            font-size: 14px;
+        }
+        .user-message {
+            background: #b8860b;
+            color: white;
+            align-self: flex-end;
+        }
+        .bot-message {
+            background: #e8eef4;
+            color: #2c2b28;
+            align-self: flex-start;
+        }
+        .chat-input-area {
+            display: flex;
+            padding: 10px;
+            background: white;
+            border-top: 1px solid #e2d8cc;
+        }
+        .chat-input {
+            flex: 1;
+            padding: 8px;
+            border-radius: 30px;
+            border: 1px solid #ccc;
+        }
+        .chat-send {
+            width: auto;
+            background: #7a4c1a;
+            margin-left: 8px;
+            padding: 8px 16px;
         }
     </style>
 </head>
 <body>
 <div class="container">
-    <h1 style="text-align:center;">🗝️ Квест «Тайны Тобольска»</h1>
+    <div class="lang-bar">
+        <button class="lang-btn" data-lang="ru">🇷🇺 Русский</button>
+        <button class="lang-btn" data-lang="en">🇬🇧 English</button>
+        <button class="lang-btn" data-lang="it">🇮🇹 Italiano</button>
+    </div>
     <div class="score-panel">
-        <span>⭐ Баллы: <span id="totalScore">0</span></span>
-        <span>✅ Пройдено: <span id="completedCount">0</span>/10</span>
+        <span id="scoreLabel">⭐ Баллы: <span id="totalScore">0</span></span>
+        <span id="progressLabel">✅ Пройдено: <span id="completedCount">0</span>/10</span>
     </div>
     <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
     <div id="stepsContainer"></div>
@@ -182,96 +300,196 @@
     <div id="toastMsg" class="toast">📋 Скопировано в буфер!</div>
 </div>
 
-<!-- Информационное окно приветствия -->
-<div id="introOverlay" class="intro-overlay">
-    <div class="intro-card">
-        <h2>🏰 Добро пожаловать в квест «Тайны Тобольска»!</h2>
-        <p><strong>📜 О квесте:</strong> Вас ждёт 10 остановок по историческому центру Тобольска. Вы будете искать памятники, таблички и артефакты, отвечать на загадки и узнавать удивительные факты.</p>
-        <hr>
-        <p><strong>📍 Маршрут:</strong> Общая протяжённость пешеходного маршрута — <strong>3,5 км</strong>. <br>
-        <strong>⏱️ Время прохождения:</strong> при средней скорости 3,5 км/ч вам потребуется около <strong>1 часа</strong> (без учёта остановок на разгадывание).</p>
-        <p><strong>📅 Исторический период:</strong> Задания охватывают эпоху от основания Тобольска (1587 г.) до событий XIX века (декабристы, купечество).</p>
-        <hr>
-        <p><strong>⭐ Правила начисления баллов:</strong><br>
-        - С первой попытки — <strong>3 балла</strong><br>
-        - Со второй попытки — <strong>2 балла</strong><br>
-        - С третьей попытки — <strong>1 балл</strong><br>
-        - После трёх неверных ответов появится подсказка и вопрос закроется с <strong>0 баллов</strong>.<br>
-        <strong>🎯 Максимальный результат:</strong> 30 баллов (10 вопросов × 3 балла). Постарайтесь набрать максимум и получить золотой кубок!</p>
-        <hr>
-        <p><em>Совет: внимательно читайте загадки и ищите подсказки на самих объектах. Удачи!</em></p>
-        <button id="closeIntroBtn" class="close-intro">Начать квест →</button>
+<!-- AI-помощник -->
+<button class="ai-button" id="aiButton">🤖</button>
+<div id="chatModal" class="chat-modal">
+    <div class="chat-header">
+        <span id="chatTitle">🤖 AI-помощник</span>
+        <button class="chat-close" id="chatClose">✕</button>
+    </div>
+    <div id="chatMessages" class="chat-messages">
+        <div class="message bot-message" id="welcomeMsg">Здравствуйте! Я помогу с вопросами по квесту. Спрашивайте: как пройти, где искать, правила, подсказки.</div>
+    </div>
+    <div class="chat-input-area">
+        <input type="text" id="chatInput" class="chat-input" placeholder="Напишите вопрос...">
+        <button id="chatSend" class="chat-send">➤</button>
     </div>
 </div>
 
+<!-- Информационное окно приветствия (скрыто, будет заполняться из перевода) -->
+<div id="introOverlay" class="intro-overlay">
+    <div class="intro-card" id="introCard"></div>
+</div>
+
 <script>
-    // ===================== ДАННЫЕ КВЕСТА =====================
-    const stepsData = [
-        { title: "Пристань / Набережная", task: "Найди скульптуру или стенд у реки, связанный с основателем Сибири. Кто изображён верхом на коне?", riddle: "«Стрелой Иртыш я покорил, Хан Кучум бежал в испуге. Моя фамилия — ...»", correct: ["ермак"], nextTask: "Поднимитесь в Софийский двор кремля. Найдите знак «Место основания Тобольска». В каком году заложен первый острог?" },
-        { title: "Софийский собор (знак основания)", task: null, riddle: "«Четыре цифры: год рожденья града. Сложи их все до одного, но здесь введи число родное. 1+5+8+7 = ?»", correct: ["1587","21"], nextTask: "Идите к Тюремному замку. Найдите фамилию знаменитого писателя-каторжанина." },
-        { title: "Тюремный замок", task: null, riddle: "«Я создал роман про главного героя, здесь шёл путём на каторгу в ссылку. Моя фамилия всем вам знакома». Кто?", correct: ["достоевский"], nextTask: "К Гостиному двору. Найдите плиту с римскими цифрами «XVIII век». Какое число это?" },
-        { title: "Гостиный двор", task: null, riddle: "«XVIII римскими — какой век? Введи цифру!»", correct: ["18","восемнадцать","18 век"], nextTask: "Перейдите к Рентерее (башня с часами). Герб города — какое животное в верхней части?" },
-        { title: "Рентерея", task: null, riddle: "«Пушной зверёк, что целится из лука, гордость тайги, сибирская …»", correct: ["соболь"], nextTask: "Памятник Семёну Ремезову. Кем он был? (одно слово)" },
-        { title: "Памятник Семёну Ремезову", task: null, riddle: "«Не художник, не строитель, но чертил он всю Сибирь. Творец атласа, древний …»", correct: ["картограф","чертёжник"], nextTask: "Дом Корнилова (ул. Октябрьская, 2). Фамилия купцов-меценатов." },
-        { title: "Дом Корнилова", task: null, riddle: "«Первое электричество в Сибири, мрамор, пароходы. Чья это династия?»", correct: ["корниловы"], nextTask: "Памятник Менделееву. Год установки — 1984. Введите последнюю цифру." },
-        { title: "Памятник Менделееву", task: null, riddle: "«Год стоит: 1984. Цифра последняя — открой секрет.»", correct: ["4","четыре"], nextTask: "Памятник воинам-сибирякам. Какое оружие в руках у фигуры?" },
-        { title: "Памятник воинам-сибирякам", task: null, riddle: "«В руке железный клинок, защитника символ. Назови оружие одним словом.»", correct: ["меч","шпага","сабля"], nextTask: "Дом губернатора. Фамилия декабриста в ссылке." },
-        { title: "Дом губернатора", task: null, riddle: "«Басаргин или Муравьёв — Укажет точно мемориал. Введи фамилию»", correct: ["басаргин","муравьев-апостол","басаргина"], nextTask: null }
-    ];
+    // ===================== ПЕРЕВОДЫ =====================
+    const translations = {
+        ru: {
+            scoreLabel: "⭐ Баллы: ",
+            progressLabel: "✅ Пройдено: ",
+            checkBtn: "Проверить",
+            nextBtn: "➡️ Следующий вопрос",
+            pointsAdded: (p) => ` +${p} балла(ов) за ответ.`,
+            hintUsed: "⚠️ Использована подсказка — 0 баллов.",
+            hintMessage: (answer) => `💡 Подсказка: Правильный ответ: ${answer}. Вы получаете 0 баллов за этот вопрос.`,
+            wrongAttemptsLeft: (left) => `❌ Неверно. Осталось попыток: ${left}. Попробуйте ещё!`,
+            alreadyClosed: "❌ Этот вопрос уже закрыт с 0 баллов. Переходите к следующему.",
+            nextTaskPrefix: "✅ Далее: ",
+            // intro
+            introTitle: "🏰 Добро пожаловать в квест «Тайны Тобольска»!",
+            introText1: "📜 О квесте: Вас ждёт 10 остановок по историческому центру Тобольска. Вы будете искать памятники, таблички и артефакты, отвечать на загадки и узнавать удивительные факты.",
+            introDistance: "📍 Маршрут: Общая протяжённость пешеходного маршрута — 3,5 км.",
+            introTime: "⏱️ Время прохождения: при средней скорости 3,5 км/ч потребуется около 1 часа (без учёта остановок на разгадывание).",
+            introPeriod: "📅 Исторический период: от основания Тобольска (1587 г.) до XIX века (декабристы, купечество).",
+            introRules: "⭐ Правила начисления баллов:\n- С первой попытки — 3 балла\n- Со второй — 2 балла\n- С третьей — 1 балл\n- После трёх неверных ответов — подсказка и 0 баллов.\n🎯 Максимальный результат: 30 баллов.",
+            introAdvice: "Совет: внимательно читайте загадки и ищите подсказки на объектах. Удачи!",
+            startBtn: "Начать квест →",
+            // chat
+            chatTitle: "🤖 AI-помощник",
+            welcomeMsg: "Здравствуйте! Я помогу с вопросами по квесту. Спрашивайте: как пройти, где искать, правила, подсказки.",
+            answerRoute: "Маршрут проходит по историческому центру Тобольска. Общая длина около 3,5 км. Следуйте по порядку точек — вы их видите на экране.",
+            answerHelpPoint: "Каждая точка — реальный объект в городе. Внимательно читайте загадку и ищите подсказки на месте (таблички, памятники).",
+            answerRules: "Баллы начисляются за правильный ответ: 3 (1 попытка), 2 (2), 1 (3). После 3 ошибок — подсказка и 0 баллов. Максимум 30 баллов.",
+            answerHint: "Если застряли, попробуйте поискать на объекте год, фамилию или символ. Можно ввести не точный ответ — система проверит похожие варианты.",
+            answerDefault: "Я понимаю не всё, но для этого квеста советую посмотреть на текущую загадку, проверить табличку рядом. Если нужна конкретная помощь — спросите: «что такое Рентерея?» или «где искать Достоевского?»"
+        },
+        en: {
+            scoreLabel: "⭐ Score: ",
+            progressLabel: "✅ Completed: ",
+            checkBtn: "Check",
+            nextBtn: "➡️ Next question",
+            pointsAdded: (p) => ` +${p} point(s) for the answer.`,
+            hintUsed: "⚠️ Hint used — 0 points.",
+            hintMessage: (answer) => `💡 Hint: Correct answer is ${answer}. You get 0 points for this question.`,
+            wrongAttemptsLeft: (left) => `❌ Wrong. Attempts left: ${left}. Try again!`,
+            alreadyClosed: "❌ This question is already closed with 0 points. Move to the next one.",
+            nextTaskPrefix: "✅ Next: ",
+            introTitle: "🏰 Welcome to the quest «Secrets of Tobolsk»!",
+            introText1: "📜 About the quest: 10 stops in the historic center of Tobolsk. You will look for monuments, plaques and artifacts, solve riddles and learn amazing facts.",
+            introDistance: "📍 Route: total walking distance 3.5 km.",
+            introTime: "⏱️ Time: at average speed of 3.5 km/h approx. 1 hour (excluding stops for solving).",
+            introPeriod: "📅 Historical period: from the foundation of Tobolsk (1587) to the 19th century (Decembrists, merchants).",
+            introRules: "⭐ Scoring rules:\n- 1st attempt — 3 points\n- 2nd attempt — 2 points\n- 3rd attempt — 1 point\n- After 3 wrong answers — hint and 0 points.\n🎯 Maximum score: 30 points.",
+            introAdvice: "Tip: read riddles carefully and look for clues on the objects. Good luck!",
+            startBtn: "Start quest →",
+            chatTitle: "🤖 AI assistant",
+            welcomeMsg: "Hello! I can help with quest questions. Ask me: how to go, where to look, rules, hints.",
+            answerRoute: "The route goes through the historic center of Tobolsk. Total length ~3.5 km. Follow the points in order as shown on screen.",
+            answerHelpPoint: "Each point is a real city object. Read the riddle carefully and search for clues on site (plaques, monuments).",
+            answerRules: "Points are awarded: 3 (1st try), 2 (2nd), 1 (3rd). After 3 wrong — hint and 0 points. Maximum 30 points.",
+            answerHint: "If stuck, look for a year, a surname, or a symbol on object. You can enter similar answers — the system will recognize them.",
+            answerDefault: "I don't understand everything, but for this quest I suggest looking at the current riddle and checking nearby plaques. Ask specific: «What is Rentepeya?» or «Where is Dostoevsky?»"
+        },
+        it: {
+            scoreLabel: "⭐ Punteggio: ",
+            progressLabel: "✅ Completati: ",
+            checkBtn: "Verifica",
+            nextBtn: "➡️ Domanda successiva",
+            pointsAdded: (p) => ` +${p} punti per la risposta.`,
+            hintUsed: "⚠️ Usato suggerimento — 0 punti.",
+            hintMessage: (answer) => `💡 Suggerimento: Risposta corretta è ${answer}. Ricevi 0 punti per questa domanda.`,
+            wrongAttemptsLeft: (left) => `❌ Sbagliato. Tentativi rimasti: ${left}. Riprova!`,
+            alreadyClosed: "❌ Questa domanda è già chiusa con 0 punti. Passa alla prossima.",
+            nextTaskPrefix: "✅ Prossimo: ",
+            introTitle: "🏰 Benvenuti al quest «Segreti di Tobolsk»!",
+            introText1: "📜 Informazioni: 10 tappe nel centro storico di Tobolsk. Cercate monumenti, targhe e manufatti, risolvete enigmi e scoprite fatti sorprendenti.",
+            introDistance: "📍 Percorso: lunghezza totale a piedi 3,5 km.",
+            introTime: "⏱️ Tempo: a velocità media 3,5 km/h circa 1 ora (escluse soste per risolvere).",
+            introPeriod: "📅 Periodo storico: dalla fondazione di Tobolsk (1587) al XIX secolo (Decabristi, mercanti).",
+            introRules: "⭐ Regole punteggio:\n- 1° tentativo — 3 punti\n- 2° — 2 punti\n- 3° — 1 punto\n- Dopo 3 errori — suggerimento e 0 punti.\n🎯 Massimo: 30 punti.",
+            introAdvice: "Consiglio: leggete bene gli indizi e cercate gli elementi sugli oggetti. Buona fortuna!",
+            startBtn: "Inizia quest →",
+            chatTitle: "🤖 Assistente AI",
+            welcomeMsg: "Salve! Posso aiutare con domande sul quest. Chiedete: come andare, dove cercare, regole, suggerimenti.",
+            answerRoute: "Il percorso attraversa il centro storico di Tobolsk. Lunghezza totale 3,5 km. Seguite le tappe in ordine come sullo schermo.",
+            answerHelpPoint: "Ogni tappa è un oggetto reale in città. Leggete attentamente l'enigma e cercate indizi sul posto (targhe, monumenti).",
+            answerRules: "Punteggio: 3 (1° tentativo), 2 (2°), 1 (3°). Dopo 3 errori — suggerimento e 0 punti. Massimo 30 punti.",
+            answerHint: "Se in difficoltà, cercate un anno, un cognome o un simbolo sull'oggetto. Potete inserire risposte simili — il sistema le riconosce.",
+            answerDefault: "Non capisco tutto, ma per questo quest suggerisco di guardare l'indizio attuale e controllare le targhe vicine. Chiedete specifico: «Cos'è Rentepeya?» o «Dov'è Dostoevskij?»"
+        }
+    };
 
-    // Развёрнутые исторические справки (каждая не более 20 строк)
-    const detailedFacts = [
-        `📍 Точка 1. Памятник Ермаку (набережная Иртыша)
-Ермак Тимофеевич — казачий атаман, начавший присоединение Сибири к Русскому царству в 1582 году. Его отряд разгромил войско хана Кучума. 
-🎯 Интересный факт: существуют десятки легенд о сокровищах Ермака, якобы зарытых на дне Иртыша. По одной из них, его кольчуга, подаренная Иваном Грозным, до сих пор лежит в подводной пещере. 
-Тобольск был основан через 5 лет после похода Ермака, и местные жители считают его духовным покровителем города.`,
+    // Данные квеста с переводами загадок, заданий и исторических справок
+    const stepsDataTranslations = {
+        ru: [
+            { title: "Пристань / Набережная", task: "Найди скульптуру или стенд у реки, связанный с основателем Сибири. Кто изображён верхом на коне?", riddle: "«Стрелой Иртыш я покорил, Хан Кучум бежал в испуге. Моя фамилия — ...»", correct: ["ермак"], nextTask: "Поднимитесь в Софийский двор кремля. Найдите знак «Место основания Тобольска». В каком году заложен первый острог?" },
+            { title: "Софийский собор (знак основания)", task: null, riddle: "«Четыре цифры: год рожденья града. Сложи их все до одного, но здесь введи число родное. 1+5+8+7 = ?»", correct: ["1587","21"], nextTask: "Идите к Тюремному замку. Найдите фамилию знаменитого писателя-каторжанина." },
+            { title: "Тюремный замок", task: null, riddle: "«Я создал роман про главного героя, здесь шёл путём на каторгу в ссылку. Моя фамилия всем вам знакома». Кто?", correct: ["достоевский"], nextTask: "К Гостиному двору. Найдите плиту с римскими цифрами «XVIII век». Какое число это?" },
+            { title: "Гостиный двор", task: null, riddle: "«XVIII римскими — какой век? Введи цифру!»", correct: ["18","восемнадцать","18 век"], nextTask: "Перейдите к Рентерее (башня с часами). Герб города — какое животное в верхней части?" },
+            { title: "Рентерея", task: null, riddle: "«Пушной зверёк, что целится из лука, гордость тайги, сибирская …»", correct: ["соболь"], nextTask: "Памятник Семёну Ремезову. Кем он был? (одно слово)" },
+            { title: "Памятник Семёну Ремезову", task: null, riddle: "«Не художник, не строитель, но чертил он всю Сибирь. Творец атласа, древний …»", correct: ["картограф","чертёжник"], nextTask: "Дом Корнилова (ул. Октябрьская, 2). Фамилия купцов-меценатов." },
+            { title: "Дом Корнилова", task: null, riddle: "«Первое электричество в Сибири, мрамор, пароходы. Чья это династия?»", correct: ["корниловы"], nextTask: "Памятник Менделееву. Год установки — 1984. Введите последнюю цифру." },
+            { title: "Памятник Менделееву", task: null, riddle: "«Год стоит: 1984. Цифра последняя — открой секрет.»", correct: ["4","четыре"], nextTask: "Памятник воинам-сибирякам. Какое оружие в руках у фигуры?" },
+            { title: "Памятник воинам-сибирякам", task: null, riddle: "«В руке железный клинок, защитника символ. Назови оружие одним словом.»", correct: ["меч","шпага","сабля"], nextTask: "Дом губернатора. Фамилия декабриста в ссылке." },
+            { title: "Дом губернатора", task: null, riddle: "«Басаргин или Муравьёв — Укажет точно мемориал. Введи фамилию»", correct: ["басаргин","муравьев-апостол","басаргина"], nextTask: null }
+        ],
+        en: [
+            { title: "Pier / Embankment", task: "Find a sculpture or info board by the river, connected with the founder of Siberia. Who is depicted on horseback?", riddle: "«With an arrow I conquered Irtysh, Khan Kuchum fled in fear. My surname is ...»", correct: ["yermak","ermak"], nextTask: "Go to Sophia Courtyard of the Kremlin. Find the sign «Place of foundation of Tobolsk». In what year was the first fort founded?" },
+            { title: "Saint Sophia Cathedral (foundation sign)", task: null, riddle: "«Four digits: the year of the city's birth. Add them all, but here enter the native number. 1+5+8+7 = ?»", correct: ["1587","21"], nextTask: "Go to the Prison Castle. Find the surname of the famous writer-convict." },
+            { title: "Prison Castle", task: null, riddle: "«I wrote a novel about the main character, I was on my way to exile here. My surname is known to all of you.» Who?", correct: ["dostoevsky"], nextTask: "To the Gostiny Dvor. Find the plaque with Roman numerals «XVIII century». What number is this?" },
+            { title: "Gostiny Dvor", task: null, riddle: "«XVIII in Roman — what century? Enter the number!»", correct: ["18","eighteen","18 century"], nextTask: "Go to the Rentereya (tower with clock). City coat of arms — what animal is in the upper part?" },
+            { title: "Rentereya", task: null, riddle: "«A fur animal aiming a bow, the pride of the taiga, Siberian …»", correct: ["sable"], nextTask: "Monument to Semyon Remezov. What was his profession? (one word)" },
+            { title: "Monument to Semyon Remezov", task: null, riddle: "«Not an artist, not a builder, but he drew all of Siberia. Creator of the atlas, ancient …»", correct: ["cartographer"], nextTask: "Kornilov House (Oktyabrskaya st., 2). Surname of merchant patrons." },
+            { title: "Kornilov House", task: null, riddle: "«First electricity in Siberia, marble, steamships. Whose dynasty?»", correct: ["kornilovs"], nextTask: "Monument to Mendeleev. Year of installation — 1984. Enter the last digit." },
+            { title: "Monument to Mendeleev", task: null, riddle: "«Year: 1984. The last digit — unlock the secret.»", correct: ["4","four"], nextTask: "Monument to Siberian warriors. What weapon is in the figure's hands?" },
+            { title: "Monument to Siberian Warriors", task: null, riddle: "«In hand an iron blade, a defender's symbol. Name the weapon in one word.»", correct: ["sword","saber"], nextTask: "Governor's House. Surname of the Decembrist in exile." },
+            { title: "Governor's House", task: null, riddle: "«Basarghin or Muravyov — the memorial will tell you exactly. Enter the surname.»", correct: ["basarghin","muravyov-apostol","basarghina"], nextTask: null }
+        ],
+        it: [
+            { title: "Molo / Lungofiume", task: "Trova una scultura o cartello vicino al fiume, legato al fondatore della Siberia. Chi è raffigurato a cavallo?", riddle: "«Con una freccia ho conquistato l'Irtyš, Khan Kuchum fuggì spaventato. Il mio cognome è ...»", correct: ["ermak"], nextTask: "Salite al cortile della Cattedrale di Sofia al Cremlino. Trovate il segno «Luogo di fondazione di Tobolsk». In che anno fu fondato il primo forte?" },
+            { title: "Cattedrale di Sofia (segno di fondazione)", task: null, riddle: "«Quattro cifre: l'anno di nascita della città. Sommale tutte, ma qui inserisci il numero nativo. 1+5+8+7 = ?»", correct: ["1587","21"], nextTask: "Andate al Castello carcerario. Trovate il cognome del famoso scrittore detenuto." },
+            { title: "Castello carcerario", task: null, riddle: "«Ho scritto un romanzo sul protagonista, qui ero in esilio. Il mio cognome è noto a tutti.» Chi?", correct: ["dostoevskij"], nextTask: "Al Gostiny Dvor. Trovate la targa con numeri romani «XVIII secolo». Che numero è?" },
+            { title: "Gostiny Dvor", task: null, riddle: "«XVIII in romano — quale secolo? Inserisci il numero!»", correct: ["18","diciotto"], nextTask: "Andate alla Rentereya (torre con orologio). Stemma della città — quale animale nella parte superiore?" },
+            { title: "Rentereya", task: null, riddle: "«Un animale da pelliccia che mira con l'arco, orgoglio della taiga, siberiano …»", correct: ["zibellino"], nextTask: "Monumento a Semyon Remezov. Qual era la sua professione? (una parola)" },
+            { title: "Monumento a Semyon Remezov", task: null, riddle: "«Né artista, né costruttore, ma disegnava tutta la Siberia. Creatore dell'atlante, antico …»", correct: ["cartografo"], nextTask: "Casa Kornilov (via Oktyabrskaya, 2). Cognome dei mercanti mecenati." },
+            { title: "Casa Kornilov", task: null, riddle: "«Prima elettricità in Siberia, marmo, battelli a vapore. Di chi è la dinastia?»", correct: ["kornilov"], nextTask: "Monumento a Mendeleev. Anno di installazione — 1984. Inserisci l'ultima cifra." },
+            { title: "Monumento a Mendeleev", task: null, riddle: "«Anno: 1984. L'ultima cifra — sblocca il segreto.»", correct: ["4","quattro"], nextTask: "Monumento ai guerrieri siberiani. Quale arma è nelle mani della figura?" },
+            { title: "Monumento ai guerrieri siberiani", task: null, riddle: "«In mano una lama di ferro, simbolo del difensore. Nomina l'arma in una parola.»", correct: ["spada"], nextTask: "Casa del governatore. Cognome del decabrista in esilio." },
+            { title: "Casa del governatore", task: null, riddle: "«Basarghin o Muravyov — il memoriale lo dirà esattamente. Inserisci il cognome.»", correct: ["basarghin","muravyov-apostol"], nextTask: null }
+        ]
+    };
 
-        `📍 Точка 2. Софийский собор и знак основания Тобольска
-Дата 1587 год — официальный год основания Тобольска. Первый острог заложил воевода Данила Чулков. 
-🔎 Любопытно: Тобольск более 200 лет был «столицей Сибири» — здесь находился Сибирский приказ, а в 1708 году Пётр I сделал город центром огромной Сибирской губернии (от Урала до Тихого океана). 
-Именно в Тобольске впервые в Сибири начали каменное строительство — кремль построен из кирпича и белого камня.`,
+    const detailedFactsTranslations = {
+        ru: [
+            "📍 Точка 1. Памятник Ермаку (набережная Иртыша)\nЕрмак Тимофеевич — казачий атаман, начавший присоединение Сибири к Русскому царству в 1582 году. Интересный факт: существуют легенды о сокровищах Ермака на дне Иртыша. Тобольск основан через 5 лет после его похода.",
+            "📍 Точка 2. Софийский собор и знак основания Тобольска\n1587 год — официальный год основания. Тобольск более 200 лет был «столицей Сибири». Впервые в Сибири начали каменное строительство именно здесь.",
+            "📍 Точка 3. Тобольский тюремный замок (централ)\nЗдесь содержались Достоевский, декабристы. Достоевскому тайно передали Евангелие, которое он хранил всю жизнь.",
+            "📍 Точка 4. Гостиный двор (XVIII век)\nПостроен при Петре I архитектором Ухтомским. Единственный каменный гостиный двор XVIII века в Сибири. Стены толщиной до 2 метров спасли его при пожаре 1841 года.",
+            "📍 Точка 5. Рентерея (Приказная палата)\nЗдание для хранения казны. Герб Тобольска: соболь с луком и стрелами — символ пушного богатства и защиты границ.",
+            "📍 Точка 6. Памятник Семёну Ремезову\nСоздатель первого атласа Сибири, архитектор кремля. Построил первые солнечные часы в Тобольске.",
+            "📍 Точка 7. Дом Корнилова\nПервое здание в Сибири с электричеством и водопроводом. По легенде, Корниловы звонили самому императору, чтобы проверить телефон.",
+            "📍 Точка 8. Памятник Менделееву\nВеликий химик родился в Тобольске. Здесь увлёкся экспериментами: пытался выплавить стекло из песка.",
+            "📍 Точка 9. Памятник воинам-сибирякам\nСибиряки участвовали в войне 1812 года, Первой мировой и ВОВ. Первыми вошли в Париж в 1814 году.",
+            "📍 Точка 10. Дом губернатора\nМесто ссылки декабристов. Здесь они открыли первую бесплатную школу в Сибири и литературный кружок."
+        ],
+        en: [
+            "📍 Point 1. Monument to Yermak (Irtysh embankment)\nYermak Timofeyevich – Cossack ataman who began the annexation of Siberia in 1582. Legend: Yermak's treasures lie at the bottom of the Irtysh.",
+            "📍 Point 2. St. Sophia Cathedral and foundation sign\n1587 – official foundation year. Tobolsk was the 'capital of Siberia' for over 200 years.",
+            "📍 Point 3. Tobolsk Prison Castle\nDostoevsky and Decembrists were held here. Dostoevsky received a secret Gospel that he kept all his life.",
+            "📍 Point 4. Gostiny Dvor (18th century)\nBuilt under Peter I by architect Ukhtomsky. The only stone Gostiny Dvor of the 18th century in Siberia. Walls up to 2 meters thick saved it from fire in 1841.",
+            "📍 Point 5. Rentereya (Prikaznaya Chamber)\nTreasury building. Coat of arms: sable with a bow and arrow – symbol of fur wealth and border defense.",
+            "📍 Point 6. Monument to Semyon Remezov\nCreator of the first atlas of Siberia, architect of the Kremlin. Built the first sundial in Tobolsk.",
+            "📍 Point 7. Kornilov House\nFirst building in Siberia with electricity and running water. Legend says the Kornilovs called the emperor to test the phone.",
+            "📍 Point 8. Monument to Mendeleev\nThe great chemist was born in Tobolsk. Here he became interested in experiments: tried to melt glass from sand.",
+            "📍 Point 9. Monument to Siberian Warriors\nSiberians fought in the war of 1812, WWI and WWII. They were the first to enter Paris in 1814.",
+            "📍 Point 10. Governor's House\nPlace of Decembrist exile. They opened the first free school in Siberia and a literary circle."
+        ],
+        it: [
+            "📍 Punto 1. Monumento a Yermak (lungofiume Irtyš)\nYermak Timofeevič – atamano cosacco che iniziò l'annessione della Siberia nel 1582. Leggenda: tesori di Yermak sul fondo dell'Irtyš.",
+            "📍 Punto 2. Cattedrale di Sofia e segno di fondazione\n1587 – anno ufficiale di fondazione. Tobolsk fu la 'capitale della Siberia' per oltre 200 anni.",
+            "📍 Punto 3. Castello carcerario di Tobolsk\nQui furono detenuti Dostoevskij e i decabristi. Dostoevskij ricevette un Vangelo segreto che conservò per sempre.",
+            "📍 Punto 4. Gostiny Dvor (XVIII secolo)\nCostruito sotto Pietro I dall'architetto Ukhtomsky. Unico Gostiny Dvor in pietra del XVIII secolo in Siberia. Muri spessi fino a 2 metri salvarono l'edificio dall'incendio del 1841.",
+            "📍 Punto 5. Rentereya (Camera Prikaznaya)\nEdificio del tesoro. Stemma: zibellino con arco e frecce – simbolo di ricchezza di pellicce e difesa dei confini.",
+            "📍 Punto 6. Monumento a Semyon Remezov\nCreatore del primo atlante della Siberia, architetto del Cremlino. Costruì la prima meridiana a Tobolsk.",
+            "📍 Punto 7. Casa Kornilov\nPrimo edificio in Siberia con elettricità e acqua corrente. Secondo la leggenda, i Kornilov chiamarono l'imperatore stesso per testare il telefono.",
+            "📍 Punto 8. Monumento a Mendeleev\nIl grande chimico nacque a Tobolsk. Qui si appassionò agli esperimenti: tentò di fondere il vetro dalla sabbia.",
+            "📍 Punto 9. Monumento ai guerrieri siberiani\nI siberiani combatterono nella guerra del 1812, nella prima guerra mondiale e nella seconda. Furono i primi a entrare a Parigi nel 1814.",
+            "📍 Punto 10. Casa del governatore\nLuogo di esilio dei decabristi. Aprirono la prima scuola gratuita in Siberia e un circolo letterario."
+        ]
+    };
 
-        `📍 Точка 3. Тобольский тюремный замок (централ)
-Здание известно как «Тобольский централ» — одна из старейших тюрем в России (построена в 1855 году). Здесь содержались декабристы, участники польских восстаний, а также Фёдор Достоевский (по пути на каторгу в Омск). 
-📖 Занимательный факт: Достоевскому в Тобольске тайно передали Евангелие жёны декабристов — он хранил его до самой смерти. 
-Также в этом замке отбывал ссылку большевик Яков Свердлов.`,
-
-        `📍 Точка 4. Гостиный двор (XVIII век)
-Построен в 1703–1708 годах по указу Петра I архитектором Дмитрием Ухтомским (автором колокольни Троице-Сергиевой лавры). Это единственный каменный гостиный двор XVIII века в Сибири. 
-🛍️ В его аркадах торговали мехами, китайским шёлка, чаем, пряностями. В подвалах хранили вина и боеприпасы. 
-Необычный факт: во время пожара 1841 года выгорел весь город, но Гостиный двор уцелел — его стены толщиной до 2 метров не дали огню распространиться.`,
-
-        `📍 Точка 5. Рентерея (Приказная палата)
-Здание построено в конце XVII века для хранения государственной казны (рента — налог). Позже здесь заседал Сибирский приказ — главный административный орган. 
-🐅 Герб Тобольска: в верхней части щита — соболь с луком и стрелой. Это один из старейших гербов России (утверждён в 1785 году). Соболь символизировал богатство Сибири пушниной, а лук — защиту границ. 
-В 1918 году в Рентерее размещался штаб Красной гвардии.`,
-
-        `📍 Точка 6. Памятник Семёну Ремезову
-Семён Ульянович Ремезов (1642–1720) — сибирский летописец, архитектор, картограф. Он создал первый атлас Сибири — «Чертёжную книгу» (1701 год), а также спроектировал Тобольский кремль. 
-🗺️ Удивительный факт: Ремезов построил в Тобольске первые солнечные часы и разработал проект деревянного водопровода, который действовал более 100 лет. 
-Его чертежи настолько точны, что ими пользовались ещё в XIX веке.`,
-
-        `📍 Точка 7. Дом Корнилова (особняк купцов Корниловых)
-Купеческая династия Корниловых владела пароходством, золотыми приисками и кожевенными заводами. В 1880-х годах их дом стал первым в Сибири зданием с электрическим освещением и водопроводом. 
-💡 Забавный факт: когда в доме установили первый телефон, Корниловы заказали из Москвы звонок, чтобы проверить связь — на том конце провода оказался сам император Александр III, который лично поздравил купцов с техническим прогрессом.`,
-
-        `📍 Точка 8. Памятник Дмитрию Менделееву
-Великий химик родился в Тобольске в 1834 году в семье директора гимназии. Здесь он учился в Тобольской гимназии (ныне школа №1). 
-🔬 Интересный факт: именно в Тобольске у Менделеева впервые проявилась страсть к экспериментам — он пытался выплавить стекло из песка на пекарне своего отца. 
-Памятник установлен в 1984 году к 150-летию учёного. Скульптор изобразил Менделеева сидящим с задумчивым взглядом — говорят, именно в этот момент он «увидел» свою таблицу.`,
-
-        `📍 Точка 9. Памятник воинам-сибирякам (площадь Победы)
-Монумент посвящён сибирякам, участвовавшим в Отечественной войне 1812 года, Первой мировой и Великой Отечественной. Сибиряки считались самой стойкой и дисциплинированной частью русской армии. 
-⚔️ Факт: в 1812 году 14 сибирских полков сражались под Бородино. Сибиряки первыми вошли в Париж в 1814 году. 
-На постаменте высечены имена тоболяков — Героев Советского Союза. Меч в руке воина — символ защиты родной земли.`,
-
-        `📍 Точка 10. Дом губернатора (место ссылки декабристов)
-В Тобольске после восстания 1825 года отбывали ссылку декабристы: братья Муравьёвы-Апостолы, Николай Басаргин, Михаил Фонвизин и другие. 
-📜 Любопытный факт: именно здесь декабристы организовали первый в Сибири литературный кружок и открыли бесплатную школу для детей мещан. 
-Жёны декабристов, последовавшие за мужьями в Сибирь, создали в Тобольске первый женский благотворительный комитет. Здание губернатора сохранило аутентичные интерьеры той эпохи.`
-    ];
-
-    // Состояние
+    // Текущий язык
+    let currentLang = 'ru';
     let currentQuestionIndex = 0;
     let scores = Array(10).fill(0);
     let attempts = Array(10).fill(0);
@@ -282,7 +500,7 @@
     let stepsContainer, totalScoreSpan, completedCountSpan, progressBar, congratsDiv;
 
     function saveState() {
-        const state = { currentQuestionIndex, scores, attempts, completed, hintShown, totalScore };
+        const state = { currentQuestionIndex, scores, attempts, completed, hintShown, totalScore, currentLang };
         localStorage.setItem('tobolsk_quest', JSON.stringify(state));
     }
 
@@ -297,12 +515,13 @@
                 completed = s.completed;
                 hintShown = s.hintShown;
                 totalScore = s.totalScore;
+                if (s.currentLang) currentLang = s.currentLang;
             } catch(e) {}
         }
-        updateStatsAndProgress();
+        updateUI();
     }
 
-    function updateStatsAndProgress() {
+    function updateUI() {
         totalScoreSpan.innerText = totalScore;
         const compCount = completed.filter(c => c === true).length;
         completedCountSpan.innerText = `${compCount}/10`;
@@ -319,23 +538,19 @@
         let message = '';
         if (totalScore === maxScore) {
             trophyHtml = '<div class="trophy">🏆✨ ЗОЛОТОЙ КУБОК ✨🏆</div>';
-            message = '<strong>🎉 ПОЗДРАВЛЯЕМ !! 🎉</strong><br>👏👏👏 Вы супер эрудит и знаток города! 👏👏👏';
+            message = (currentLang === 'ru') ? '<strong>🎉 ПОЗДРАВЛЯЕМ !! 🎉</strong><br>👏👏👏 Вы супер эрудит и знаток города! 👏👏👏' : (currentLang === 'en' ? '<strong>🎉 CONGRATULATIONS !! 🎉</strong><br>👏👏👏 You are a super expert and connoisseur of the city! 👏👏👏' : '<strong>🎉 CONGRATULAZIONI !! 🎉</strong><br>👏👏👏 Sei un super esperto e conoscitore della città! 👏👏👏');
         } else {
             trophyHtml = '<div class="trophy">⭐🏅⭐</div>';
-            message = `<strong>Квест пройден!</strong><br>Вы набрали ${totalScore} баллов из ${maxScore}.<br>Отличный результат, но в следующий раз попробуйте получить все 3 балла за каждый вопрос!`;
+            if (currentLang === 'ru') message = `<strong>Квест пройден!</strong><br>Вы набрали ${totalScore} баллов из ${maxScore}.<br>Отличный результат, но в следующий раз попробуйте получить все 3 балла за каждый вопрос!`;
+            else if (currentLang === 'en') message = `<strong>Quest completed!</strong><br>You scored ${totalScore} out of ${maxScore} points.<br>Great result, but next time try to get all 3 points for each question!`;
+            else message = `<strong>Quest completato!</strong><br>Hai totalizzato ${totalScore} punti su ${maxScore}.<br>Ottimo risultato, ma la prossima volta prova a ottenere tutti e 3 i punti per ogni domanda!`;
         }
-        congratsDiv.innerHTML = `
-            ${trophyHtml}
-            ${message}
-            <br><br>
-            <button id="shareResultsBtn" class="share-btn">📤 Поделиться результатами (${totalScore}/${maxScore})</button>
-            <button id="resetBtn" style="background:#7a4c1a; margin-top:10px;">🔄 Пройти квест заново</button>
-        `;
+        congratsDiv.innerHTML = `${trophyHtml}${message}<br><br><button id="shareResultsBtn" class="share-btn">📤 ${currentLang === 'ru' ? 'Поделиться результатами' : (currentLang === 'en' ? 'Share results' : 'Condividi risultati')} (${totalScore}/${maxScore})</button><button id="resetBtn" style="background:#7a4c1a; margin-top:10px;">🔄 ${currentLang === 'ru' ? 'Пройти квест заново' : (currentLang === 'en' ? 'Restart quest' : 'Ricomincia quest')}</button>`;
         congratsDiv.style.display = 'block';
         document.getElementById('shareResultsBtn')?.addEventListener('click', () => {
-            const shareText = `Я прошёл квест «Тайны Тобольска» и набрал ${totalScore} из ${maxScore} баллов! Попробуй и ты — ${window.location.href}`;
+            const shareText = `${currentLang === 'ru' ? 'Я прошёл квест «Тайны Тобольска» и набрал' : (currentLang === 'en' ? 'I completed the quest "Secrets of Tobolsk" and scored' : 'Ho completato il quest "Segreti di Tobolsk" e ho totalizzato')} ${totalScore} ${currentLang === 'ru' ? 'баллов' : (currentLang === 'en' ? 'points' : 'punti')}! ${window.location.href}`;
             if (navigator.share) {
-                navigator.share({ title: 'Тобольский квест', text: shareText });
+                navigator.share({ title: currentLang === 'ru' ? 'Тобольский квест' : (currentLang === 'en' ? 'Tobolsk Quest' : 'Quest di Tobolsk'), text: shareText });
             } else {
                 navigator.clipboard.writeText(shareText);
                 const toast = document.getElementById('toastMsg');
@@ -350,34 +565,35 @@
     }
 
     function moveToNextQuestion() {
-        if (currentQuestionIndex + 1 < stepsData.length) {
+        if (currentQuestionIndex + 1 < 10) {
             currentQuestionIndex++;
             renderCurrentQuestion();
         } else {
             if (completed.every(c => c === true)) showFinalScreen();
             else renderCurrentQuestion();
         }
-        updateStatsAndProgress();
+        updateUI();
     }
 
     function checkAnswer() {
         const idx = currentQuestionIndex;
         if (completed[idx]) return;
 
-        const step = stepsData[idx];
+        const step = stepsDataTranslations[currentLang][idx];
         const inputEl = document.getElementById('answerInput');
-        const userAnswer = inputEl.value.trim().toLowerCase().replace(/[^а-яё0-9]/gi, '');
+        const userAnswer = inputEl.value.trim().toLowerCase().replace(/[^а-яёa-z0-9]/gi, '');
         const isCorrect = step.correct.some(corr => {
-            const clean = corr.toString().toLowerCase().replace(/[^а-яё0-9]/gi, '');
+            const clean = corr.toString().toLowerCase().replace(/[^а-яёa-z0-9]/gi, '');
             return userAnswer === clean;
         });
 
         const currentAttempt = attempts[idx] + 1;
         attempts[idx] = currentAttempt;
+        const t = translations[currentLang];
 
         if (hintShown[idx]) {
             const factDiv = document.getElementById('factMessage');
-            factDiv.innerHTML = `❌ Этот вопрос уже закрыт с 0 баллов. Переходите к следующему.`;
+            factDiv.innerHTML = t.alreadyClosed;
             factDiv.style.display = 'block';
             factDiv.style.background = '#ffe0e0';
             setTimeout(() => { factDiv.style.display = 'none'; factDiv.style.background = ''; }, 2000);
@@ -394,17 +610,17 @@
             scores[idx] = points;
             totalScore += points;
             completed[idx] = true;
-            updateStatsAndProgress();
+            updateUI();
 
             const factDiv = document.getElementById('factMessage');
-            factDiv.innerHTML = `<strong>📜 Историческая справка:</strong><br>${detailedFacts[idx]}`;
+            factDiv.innerHTML = `<strong>📜 ${currentLang === 'ru' ? 'Историческая справка' : (currentLang === 'en' ? 'Historical note' : 'Nota storica')}:</strong><br>${detailedFactsTranslations[currentLang][idx]}<br>${t.pointsAdded(points)}`;
             factDiv.style.display = 'block';
             document.getElementById('checkBtn').disabled = true;
             document.getElementById('answerInput').disabled = true;
 
             if (step.nextTask) {
                 const nextTaskDiv = document.getElementById('nextTaskMessage');
-                nextTaskDiv.innerHTML = `✅ <strong>Далее:</strong> ${step.nextTask}`;
+                nextTaskDiv.innerHTML = `${t.nextTaskPrefix} ${step.nextTask}`;
                 nextTaskDiv.style.display = 'block';
             }
             document.getElementById('nextBtn').style.display = 'block';
@@ -412,36 +628,34 @@
             if (currentAttempt >= 3) {
                 hintShown[idx] = true;
                 const hintDiv = document.getElementById('hintMessage');
-                hintDiv.innerHTML = `💡 <strong>Подсказка:</strong> Правильный ответ: ${step.correct[0]}. Вы получаете 0 баллов за этот вопрос.`;
+                hintDiv.innerHTML = t.hintMessage(step.correct[0]);
                 hintDiv.style.display = 'block';
 
                 scores[idx] = 0;
                 totalScore += 0;
                 completed[idx] = true;
-                updateStatsAndProgress();
+                updateUI();
 
                 const factDiv = document.getElementById('factMessage');
-                factDiv.innerHTML = `<strong>📜 Историческая справка:</strong><br>${detailedFacts[idx]}<br><br>⚠️ Использована подсказка — 0 баллов.`;
+                factDiv.innerHTML = `<strong>📜 ${currentLang === 'ru' ? 'Историческая справка' : (currentLang === 'en' ? 'Historical note' : 'Nota storica')}:</strong><br>${detailedFactsTranslations[currentLang][idx]}<br><br>${t.hintUsed}`;
                 factDiv.style.display = 'block';
                 document.getElementById('checkBtn').disabled = true;
                 document.getElementById('answerInput').disabled = true;
 
                 if (step.nextTask) {
                     const nextTaskDiv = document.getElementById('nextTaskMessage');
-                    nextTaskDiv.innerHTML = `✅ <strong>Далее:</strong> ${step.nextTask}`;
+                    nextTaskDiv.innerHTML = `${t.nextTaskPrefix} ${step.nextTask}`;
                     nextTaskDiv.style.display = 'block';
                 }
                 document.getElementById('nextBtn').style.display = 'block';
             } else {
                 const factDiv = document.getElementById('factMessage');
-                factDiv.innerHTML = `❌ Неверно. Осталось попыток: ${3 - currentAttempt}. Попробуйте ещё!`;
+                factDiv.innerHTML = t.wrongAttemptsLeft(3 - currentAttempt);
                 factDiv.style.display = 'block';
                 factDiv.style.background = '#ffe0e0';
                 setTimeout(() => {
-                    if (factDiv.style.display === 'block') {
-                        factDiv.style.display = 'none';
-                        factDiv.style.background = '';
-                    }
+                    factDiv.style.display = 'none';
+                    factDiv.style.background = '';
                 }, 2000);
             }
         }
@@ -451,33 +665,34 @@
     function renderCurrentQuestion() {
         stepsContainer.innerHTML = '';
         const idx = currentQuestionIndex;
-        const step = stepsData[idx];
+        const step = stepsDataTranslations[currentLang][idx];
         const isCompleted = completed[idx];
+        const t = translations[currentLang];
         const stepDiv = document.createElement('div');
         stepDiv.className = 'step';
         stepDiv.innerHTML = `
-            <div class="step-header">📍 Точка ${idx+1}. ${step.title}</div>
-            ${step.task ? `<div class="task"><strong>👣 Задание:</strong> ${step.task}</div>` : ''}
+            <div class="step-header">📍 ${step.title}</div>
+            ${step.task ? `<div class="task"><strong>👣 ${currentLang === 'ru' ? 'Задание' : (currentLang === 'en' ? 'Task' : 'Compito')}:</strong> ${step.task}</div>` : ''}
             <div class="riddle">${step.riddle}</div>
-            <input type="text" id="answerInput" placeholder="Введите ответ" ${isCompleted ? 'disabled' : ''} autocomplete="off">
-            <button id="checkBtn" ${isCompleted ? 'disabled' : ''}>Проверить</button>
+            <input type="text" id="answerInput" placeholder="${currentLang === 'ru' ? 'Введите ответ' : (currentLang === 'en' ? 'Enter answer' : 'Inserisci risposta')}" ${isCompleted ? 'disabled' : ''} autocomplete="off">
+            <button id="checkBtn" ${isCompleted ? 'disabled' : ''}>${t.checkBtn}</button>
             <div id="hintMessage" class="hint"></div>
             <div id="factMessage" class="fact"></div>
             <div id="nextTaskMessage" class="task" style="display:none;"></div>
-            <button id="nextBtn" style="display:none; background:#2c6e2c;">➡️ Следующий вопрос</button>
+            <button id="nextBtn" style="display:none; background:#2c6e2c;">${t.nextBtn}</button>
         `;
         stepsContainer.appendChild(stepDiv);
 
         if (isCompleted && hintShown[idx]) {
             const hintDiv = document.getElementById('hintMessage');
-            hintDiv.innerHTML = `💡 <strong>Подсказка:</strong> Правильный ответ: ${step.correct[0]}. Вы получили 0 баллов.`;
+            hintDiv.innerHTML = t.hintMessage(step.correct[0]);
             hintDiv.style.display = 'block';
             const factDiv = document.getElementById('factMessage');
-            factDiv.innerHTML = `<strong>📜 Историческая справка:</strong><br>${detailedFacts[idx]}<br><br>⚠️ Использована подсказка — 0 баллов.`;
+            factDiv.innerHTML = `<strong>📜 ${currentLang === 'ru' ? 'Историческая справка' : (currentLang === 'en' ? 'Historical note' : 'Nota storica')}:</strong><br>${detailedFactsTranslations[currentLang][idx]}<br><br>${t.hintUsed}`;
             factDiv.style.display = 'block';
         } else if (isCompleted && scores[idx] > 0) {
             const factDiv = document.getElementById('factMessage');
-            factDiv.innerHTML = `<strong>📜 Историческая справка:</strong><br>${detailedFacts[idx]}`;
+            factDiv.innerHTML = `<strong>📜 ${currentLang === 'ru' ? 'Историческая справка' : (currentLang === 'en' ? 'Historical note' : 'Nota storica')}:</strong><br>${detailedFactsTranslations[currentLang][idx]}`;
             factDiv.style.display = 'block';
         }
 
@@ -487,19 +702,97 @@
         }
         document.getElementById('nextBtn').onclick = () => moveToNextQuestion();
 
-        if (isCompleted && idx+1 < stepsData.length) {
+        if (isCompleted && idx+1 < 10) {
             document.getElementById('nextBtn').style.display = 'block';
-            const nextTaskDiv = document.getElementById('nextTaskMessage');
-            if (stepsData[idx].nextTask) {
-                nextTaskDiv.innerHTML = `✅ <strong>Далее:</strong> ${stepsData[idx].nextTask}`;
+            if (step.nextTask) {
+                const nextTaskDiv = document.getElementById('nextTaskMessage');
+                nextTaskDiv.innerHTML = `${t.nextTaskPrefix} ${step.nextTask}`;
                 nextTaskDiv.style.display = 'block';
             }
-        } else if (isCompleted && idx+1 === stepsData.length) {
+        } else if (isCompleted && idx+1 === 10) {
             showFinalScreen();
         }
     }
 
-    // Закрытие информационного окна и старт квеста
+    function setLanguage(lang) {
+        currentLang = lang;
+        document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelector(`.lang-btn[data-lang="${lang}"]`).classList.add('active');
+        const t = translations[lang];
+        document.getElementById('scoreLabel').innerHTML = t.scoreLabel + '<span id="totalScore">' + totalScore + '</span>';
+        document.getElementById('progressLabel').innerHTML = t.progressLabel + '<span id="completedCount">' + completed.filter(c=>c).length + '</span>/10';
+        totalScoreSpan = document.getElementById('totalScore');
+        completedCountSpan = document.getElementById('completedCount');
+        renderCurrentQuestion();
+        updateUI();
+        // обновляем intro надпись и чат
+        document.getElementById('chatTitle').innerText = t.chatTitle;
+        document.getElementById('welcomeMsg').innerText = t.welcomeMsg;
+        // intro overlay обновим при следующем открытии (если закрыто)
+        saveState();
+    }
+
+    // Инициализация чата
+    function initChat() {
+        const aiButton = document.getElementById('aiButton');
+        const chatModal = document.getElementById('chatModal');
+        const chatClose = document.getElementById('chatClose');
+        const chatSend = document.getElementById('chatSend');
+        const chatInput = document.getElementById('chatInput');
+        const chatMessages = document.getElementById('chatMessages');
+
+        aiButton.onclick = () => { chatModal.style.display = 'flex'; };
+        chatClose.onclick = () => { chatModal.style.display = 'none'; };
+        function addMessage(text, isUser) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+            msgDiv.innerText = text;
+            chatMessages.appendChild(msgDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        function getBotAnswer(question) {
+            const q = question.toLowerCase();
+            const t = translations[currentLang];
+            if (q.includes('маршрут') || q.includes('route') || q.includes('percorso') || q.includes('пройти') || q.includes('go') || q.includes('andare')) return t.answerRoute;
+            if (q.includes('где') || q.includes('where') || q.includes('dove') || q.includes('искать') || q.includes('find') || q.includes('cercare')) return t.answerHelpPoint;
+            if (q.includes('балл') || q.includes('point') || q.includes('punto') || q.includes('правила') || q.includes('rules') || q.includes('regole')) return t.answerRules;
+            if (q.includes('подсказк') || q.includes('hint') || q.includes('suggerimento') || q.includes('застрял') || q.includes('stuck')) return t.answerHint;
+            return t.answerDefault;
+        }
+        chatSend.onclick = () => {
+            const text = chatInput.value.trim();
+            if (!text) return;
+            addMessage(text, true);
+            const reply = getBotAnswer(text);
+            setTimeout(() => addMessage(reply, false), 300);
+            chatInput.value = '';
+        };
+        chatInput.onkeypress = (e) => { if(e.key === 'Enter') chatSend.click(); };
+    }
+
+    // Intro overlay
+    function showIntro() {
+        const t = translations[currentLang];
+        const introCard = document.getElementById('introCard');
+        introCard.innerHTML = `
+            <h2>${t.introTitle}</h2>
+            <p>${t.introText1}</p>
+            <hr>
+            <p>${t.introDistance}</p>
+            <p>${t.introTime}</p>
+            <p>${t.introPeriod}</p>
+            <p>${t.introRules.replace(/\n/g,'<br>')}</p>
+            <p><em>${t.introAdvice}</em></p>
+            <button id="closeIntroBtn" class="close-intro">${t.startBtn}</button>
+        `;
+        document.getElementById('introOverlay').style.display = 'flex';
+        document.getElementById('closeIntroBtn').onclick = () => {
+            document.getElementById('introOverlay').style.display = 'none';
+            loadState();
+            renderCurrentQuestion();
+        };
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
         stepsContainer = document.getElementById('stepsContainer');
         totalScoreSpan = document.getElementById('totalScore');
@@ -507,33 +800,27 @@
         progressBar = document.getElementById('progressBar');
         congratsDiv = document.getElementById('congrats');
 
-        const introOverlay = document.getElementById('introOverlay');
-        const closeBtn = document.getElementById('closeIntroBtn');
-
-        // Если квест уже был начат (есть сохранённое состояние), не показываем приветствие снова
+        initChat();
         const saved = localStorage.getItem('tobolsk_quest');
-        if (!saved || JSON.parse(saved).currentQuestionIndex === 0 && JSON.parse(saved).totalScore === 0) {
-            introOverlay.style.display = 'flex';
+        if (saved) {
+            const s = JSON.parse(saved);
+            if (s.currentLang) currentLang = s.currentLang;
+            else currentLang = 'ru';
         } else {
-            introOverlay.style.display = 'none';
+            currentLang = 'ru';
         }
-
-        closeBtn.addEventListener('click', () => {
-            introOverlay.style.display = 'none';
-            loadState();
-            renderCurrentQuestion();
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+            btn.addEventListener('click', () => setLanguage(btn.dataset.lang));
+            if (btn.dataset.lang === currentLang) btn.classList.add('active');
         });
+        setLanguage(currentLang);
 
-        // Если нет сохранённого состояния, загружаем пустое
-        if (!saved) {
+        const savedState = localStorage.getItem('tobolsk_quest');
+        if (!savedState || (JSON.parse(savedState).currentQuestionIndex === 0 && JSON.parse(savedState).totalScore === 0)) {
+            showIntro();
+        } else {
             loadState();
             renderCurrentQuestion();
-        } else {
-            // Если есть сохранённое, но приветствие не показали, всё равно загружаем
-            if (introOverlay.style.display === 'none') {
-                loadState();
-                renderCurrentQuestion();
-            }
         }
     });
 </script>
