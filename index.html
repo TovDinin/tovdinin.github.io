@@ -2,8 +2,12 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Квест «Тайны Тобольска» — поддержка AI и языки</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="theme-color" content="#b8860b">
+    <meta name="description" content="Пешеходный квест по Тобольску — 10 исторических точек, загадки, баллы и AI-помощник">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <title>Квест «Тайны Тобольска»</title>
     <style>
         * { box-sizing: border-box; }
         body {
@@ -158,7 +162,6 @@
         .toast.show { visibility: visible; opacity: 0.95; }
         .trophy { font-size: 80px; margin: 20px 0; }
 
-        /* intro overlay */
         .intro-overlay {
             position: fixed;
             top: 0;
@@ -187,7 +190,6 @@
             margin-top: 20px;
         }
 
-        /* AI-помощник (чат) */
         .ai-button {
             position: fixed;
             bottom: 20px;
@@ -281,6 +283,19 @@
             margin-left: 8px;
             padding: 8px 16px;
         }
+        @media (prefers-color-scheme: dark) {
+            body { background: #1a1a1a; color: #eee; }
+            .step { background: #2c2c2c; }
+            .step-header { background: #3a3a3a; color: #ffd966; }
+            .riddle { background: #3a3a3a; }
+            .task { background: #3a3a3a; }
+            .fact { background: #2c4a2c; }
+            .hint { background: #4a3a1a; color: #ffd966; }
+            .chat-messages { background: #2c2c2c; }
+            .bot-message { background: #3a3a3a; color: #eee; }
+            .chat-input-area { background: #2c2c2c; }
+            .intro-card { background: #2c2c2c; color: #eee; }
+        }
     </style>
 </head>
 <body>
@@ -300,7 +315,6 @@
     <div id="toastMsg" class="toast">📋 Скопировано в буфер!</div>
 </div>
 
-<!-- AI-помощник -->
 <button class="ai-button" id="aiButton">🤖</button>
 <div id="chatModal" class="chat-modal">
     <div class="chat-header">
@@ -316,13 +330,11 @@
     </div>
 </div>
 
-<!-- Информационное окно приветствия (скрыто, будет заполняться из перевода) -->
 <div id="introOverlay" class="intro-overlay">
     <div class="intro-card" id="introCard"></div>
 </div>
 
 <script>
-    // ===================== ПЕРЕВОДЫ =====================
     const translations = {
         ru: {
             scoreLabel: "⭐ Баллы: ",
@@ -335,7 +347,6 @@
             wrongAttemptsLeft: (left) => `❌ Неверно. Осталось попыток: ${left}. Попробуйте ещё!`,
             alreadyClosed: "❌ Этот вопрос уже закрыт с 0 баллов. Переходите к следующему.",
             nextTaskPrefix: "✅ Далее: ",
-            // intro
             introTitle: "🏰 Добро пожаловать в квест «Тайны Тобольска»!",
             introText1: "📜 О квесте: Вас ждёт 10 остановок по историческому центру Тобольска. Вы будете искать памятники, таблички и артефакты, отвечать на загадки и узнавать удивительные факты.",
             introDistance: "📍 Маршрут: Общая протяжённость пешеходного маршрута — 3,5 км.",
@@ -344,7 +355,6 @@
             introRules: "⭐ Правила начисления баллов:\n- С первой попытки — 3 балла\n- Со второй — 2 балла\n- С третьей — 1 балл\n- После трёх неверных ответов — подсказка и 0 баллов.\n🎯 Максимальный результат: 30 баллов.",
             introAdvice: "Совет: внимательно читайте загадки и ищите подсказки на объектах. Удачи!",
             startBtn: "Начать квест →",
-            // chat
             chatTitle: "🤖 AI-помощник",
             welcomeMsg: "Здравствуйте! Я помогу с вопросами по квесту. Спрашивайте: как пройти, где искать, правила, подсказки.",
             answerRoute: "Маршрут проходит по историческому центру Тобольска. Общая длина около 3,5 км. Следуйте по порядку точек — вы их видите на экране.",
@@ -409,7 +419,6 @@
         }
     };
 
-    // Данные квеста с переводами загадок, заданий и исторических справок
     const stepsDataTranslations = {
         ru: [
             { title: "Пристань / Набережная", task: "Найди скульптуру или стенд у реки, связанный с основателем Сибири. Кто изображён верхом на коне?", riddle: "«Стрелой Иртыш я покорил, Хан Кучум бежал в испуге. Моя фамилия — ...»", correct: ["ермак"], nextTask: "Поднимитесь в Софийский двор кремля. Найдите знак «Место основания Тобольска». В каком году заложен первый острог?" },
@@ -488,7 +497,6 @@
         ]
     };
 
-    // Текущий язык
     let currentLang = 'ru';
     let currentQuestionIndex = 0;
     let scores = Array(10).fill(0);
@@ -725,14 +733,12 @@
         completedCountSpan = document.getElementById('completedCount');
         renderCurrentQuestion();
         updateUI();
-        // обновляем intro надпись и чат
         document.getElementById('chatTitle').innerText = t.chatTitle;
-        document.getElementById('welcomeMsg').innerText = t.welcomeMsg;
-        // intro overlay обновим при следующем открытии (если закрыто)
+        const welcomeMsgDiv = document.getElementById('welcomeMsg');
+        if (welcomeMsgDiv) welcomeMsgDiv.innerText = t.welcomeMsg;
         saveState();
     }
 
-    // Инициализация чата
     function initChat() {
         const aiButton = document.getElementById('aiButton');
         const chatModal = document.getElementById('chatModal');
@@ -770,7 +776,6 @@
         chatInput.onkeypress = (e) => { if(e.key === 'Enter') chatSend.click(); };
     }
 
-    // Intro overlay
     function showIntro() {
         const t = translations[currentLang];
         const introCard = document.getElementById('introCard');
@@ -791,6 +796,15 @@
             loadState();
             renderCurrentQuestion();
         };
+    }
+
+    // Регистрация Service Worker для PWA
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js').then(reg => {
+            console.log('Service Worker registered', reg);
+        }).catch(err => {
+            console.log('Service Worker registration failed', err);
+        });
     }
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -816,7 +830,7 @@
         setLanguage(currentLang);
 
         const savedState = localStorage.getItem('tobolsk_quest');
-        if (!savedState || (JSON.parse(savedState).currentQuestionIndex === 0 && JSON.parse(savedState).totalScore === 0)) {
+        if (!savedState || (JSON.parse(savedState || '{"currentQuestionIndex":0,"totalScore":0}').currentQuestionIndex === 0 && JSON.parse(savedState || '{"totalScore":0}').totalScore === 0)) {
             showIntro();
         } else {
             loadState();
