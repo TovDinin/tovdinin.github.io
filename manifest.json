@@ -7,7 +7,7 @@
   "display": "standalone",
   "background_color": "#f5f0e8",
   "theme_color": "#b8860b",
-  "orientation": "portrait",x
+  "orientation": "portrait",
   "icons": [
     {
       "src": "https://tovdinin.github.io/tobolsk-quest/icons/icon-72x72.png",
@@ -46,7 +46,7 @@
       "type": "image/png"
     },
     {
-      "src": "https://tovdinin.github.io/tobolsk-quest/icons/icon-512x512.png",
+      "src": "https://tovdinin.github.io/tobolsk-quest/icons/icon-512x152.png",
       "sizes": "512x512",
       "type": "image/png"
     }
