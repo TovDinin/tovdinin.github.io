@@ -1,12 +1,64 @@
 {
-  "id": "ekaterinburg",
-  "name": { "ru": "Екатеринбург", "en": "Yekaterinburg", "kk": "Екатеринбург" },
-  "shortDescription": { "ru": "Столица Урала", "en": "Capital of the Urals", "kk": "Орал астанасы" },
-  "icon": "icons/ekaterinburg.png",
-  "active": true,
-  "routeDistance": 6.2,
-  "estimatedTime": 1.8,
-  "calories": 350,
-  "totalPoints": 12,
-  "maxScore": 36
+  "cities": [
+    {
+      "id": "tobolsk",
+      "name": {
+        "ru": "Тобольск",
+        "en": "Tobolsk",
+        "kk": "Тобыл"
+      },
+      "shortDescription": {
+        "ru": "Древняя столица Сибири",
+        "en": "Ancient capital of Siberia",
+        "kk": "Сібірдің ежелгі астанасы"
+      },
+      "icon": "icons/tobolsk.png",
+      "active": true,
+      "routeDistance": 8.5,
+      "estimatedTime": 2.5,
+      "calories": 480,
+      "totalPoints": 15,
+      "maxScore": 45
+    },
+    {
+      "id": "ekaterinburg",
+      "name": {
+        "ru": "Екатеринбург",
+        "en": "Yekaterinburg",
+        "kk": "Екатеринбург"
+      },
+      "shortDescription": {
+        "ru": "Столица Урала",
+        "en": "Capital of the Urals",
+        "kk": "Орал астанасы"
+      },
+      "icon": "icons/ekaterinburg.png",
+      "active": false,
+      "routeDistance": 6.2,
+      "estimatedTime": 1.8,
+      "calories": 350,
+      "totalPoints": 12,
+      "maxScore": 36
+    },
+    {
+      "id": "kazan",
+      "name": {
+        "ru": "Казань",
+        "en": "Kazan",
+        "kk": "Қазан"
+      },
+      "shortDescription": {
+        "ru": "Третья столица России",
+        "en": "Third capital of Russia",
+        "kk": "Ресейдің үшінші астанасы"
+      },
+      "icon": "icons/kazan.png",
+      "active": false,
+      "routeDistance": 7.0,
+      "estimatedTime": 2.0,
+      "calories": 400,
+      "totalPoints": 14,
+      "maxScore": 42
+    }
+  ]
 }
