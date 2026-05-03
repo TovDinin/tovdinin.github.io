@@ -4,14 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <meta name="theme-color" content="#1a1a2e">
-    <meta name="description" content="Пешеходные квесты по городам России — исторические загадки, баллы и AI-помощник">
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icons/app-icon-192.png">
-    <title>QuestHub — Городские квесты</title>
+    <title>Квест «Тайны Тобольска»</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 100%);
             color: #f0f0f0;
             padding: 20px;
@@ -19,371 +16,71 @@
             min-height: 100vh;
         }
         .container { max-width: 650px; margin: 0 auto; }
-
-        /* Header */
-        .header { margin-bottom: 24px; text-align: center; }
-        .header h1 {
-            font-size: 2rem;
-            background: linear-gradient(135deg, #ffd966, #b8860b);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            letter-spacing: -0.5px;
-        }
-        .header p { color: #aaa; font-size: 0.85rem; margin-top: 4px; }
-
-        /* City Selector */
-        .city-selector {
-            background: rgba(255,255,255,0.05);
-            backdrop-filter: blur(12px);
-            border-radius: 32px;
-            padding: 20px;
-            margin-bottom: 24px;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        .city-selector h3 { margin-bottom: 16px; font-size: 1rem; color: #ffd966; }
-        .city-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 12px;
-        }
-        .city-card {
-            background: rgba(0,0,0,0.3);
-            border-radius: 20px;
-            padding: 12px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: 1px solid transparent;
-        }
-        .city-card:hover { transform: translateY(-2px); background: rgba(184,134,11,0.2); }
-        .city-card.active {
-            border-color: #b8860b;
-            background: linear-gradient(135deg, #b8860b20, #ffd96610);
-        }
+        .header { text-align: center; margin-bottom: 24px; }
+        .header h1 { font-size: 1.8rem; background: linear-gradient(135deg, #ffd966, #b8860b); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .city-selector { background: rgba(255,255,255,0.05); border-radius: 32px; padding: 20px; margin-bottom: 24px; }
+        .city-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+        .city-card { background: rgba(0,0,0,0.3); border-radius: 20px; padding: 16px; text-align: center; cursor: pointer; transition: 0.2s; }
+        .city-card:hover { background: #b8860b; transform: translateY(-2px); }
         .city-card.disabled { opacity: 0.5; cursor: not-allowed; }
-        .city-card.disabled:hover { transform: none; background: rgba(0,0,0,0.3); }
-        .city-icon { font-size: 48px; margin-bottom: 8px; }
-        .city-name { font-weight: bold; font-size: 1rem; }
-        .city-desc { font-size: 0.7rem; color: #aaa; margin-top: 4px; }
-        .badge { background: #b8860b; font-size: 0.6rem; padding: 2px 8px; border-radius: 20px; display: inline-block; margin-top: 6px; }
-
-        /* Language Bar */
-        .lang-bar {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-bottom: 16px;
-        }
-        .lang-btn {
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
-            border: none;
-            border-radius: 40px;
-            padding: 8px 18px;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 13px;
-            color: #ddd;
-            transition: 0.2s;
-        }
-        .lang-btn.active {
-            background: #b8860b;
-            color: white;
-            box-shadow: 0 4px 12px rgba(184,134,11,0.3);
-        }
-
-        /* Score Panel */
-        .score-panel {
-            background: rgba(255,255,255,0.08);
-            backdrop-filter: blur(12px);
-            border-radius: 32px;
-            padding: 16px 20px;
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        .score-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(0,0,0,0.3);
-            padding: 8px 18px;
-            border-radius: 40px;
-            font-weight: 600;
-        }
-
-        /* Progress */
+        .city-card.disabled:hover { background: rgba(0,0,0,0.3); transform: none; }
+        .score-panel { background: rgba(255,255,255,0.08); border-radius: 32px; padding: 16px 20px; display: flex; justify-content: space-between; margin-bottom: 20px; }
+        .score-item { background: rgba(0,0,0,0.3); padding: 8px 18px; border-radius: 40px; }
         .progress { background: rgba(255,255,255,0.15); border-radius: 40px; height: 8px; margin: 15px 0; overflow: hidden; }
         .progress-bar { background: linear-gradient(90deg, #ffd966, #b8860b); width: 0%; height: 8px; border-radius: 40px; transition: width 0.3s; }
-
-        /* Step Card */
-        .step {
-            background: rgba(255,255,255,0.05);
-            backdrop-filter: blur(12px);
-            border-radius: 32px;
-            padding: 24px;
-            margin-bottom: 20px;
-            border: 1px solid rgba(255,255,255,0.1);
-            transition: transform 0.2s;
-        }
-        .step-header {
-            display: flex;
-            align-items: baseline;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin-bottom: 16px;
-        }
-        .step-number {
-            background: #b8860b;
-            padding: 6px 14px;
-            border-radius: 40px;
-            font-size: 0.8rem;
-            font-weight: bold;
-        }
+        .step { background: rgba(255,255,255,0.05); border-radius: 32px; padding: 24px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.1); }
+        .step-header { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+        .step-number { background: #b8860b; padding: 4px 12px; border-radius: 40px; font-size: 0.8rem; }
         .step-title { font-size: 1.2rem; font-weight: bold; }
-        .step-address {
-            font-size: 0.7rem;
-            color: #ffd966;
-            background: rgba(0,0,0,0.3);
-            padding: 4px 12px;
-            border-radius: 20px;
-        }
-        .riddle {
-            background: rgba(0,0,0,0.3);
-            padding: 16px;
-            border-radius: 24px;
-            font-style: italic;
-            margin: 16px 0;
-            border-left: 3px solid #b8860b;
-            line-height: 1.4;
-        }
-        input {
-            width: 100%;
-            padding: 14px 18px;
-            font-size: 16px;
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 60px;
-            margin: 12px 0;
-            background: rgba(0,0,0,0.4);
-            color: white;
-        }
+        .step-address { font-size: 0.7rem; color: #ffd966; background: rgba(0,0,0,0.3); padding: 4px 12px; border-radius: 20px; }
+        .riddle { background: rgba(0,0,0,0.3); padding: 16px; border-radius: 24px; font-style: italic; margin: 16px 0; border-left: 3px solid #b8860b; }
+        input { width: 100%; padding: 14px 18px; border: 1px solid rgba(255,255,255,0.2); border-radius: 60px; margin: 12px 0; background: rgba(0,0,0,0.4); color: white; }
         input:focus { outline: none; border-color: #b8860b; }
-        input:disabled { opacity: 0.5; }
-        button {
-            background: linear-gradient(135deg, #b8860b, #8b6508);
-            color: white;
-            border: none;
-            padding: 14px 20px;
-            border-radius: 60px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            width: 100%;
-            transition: opacity 0.2s;
-        }
-        button:disabled { opacity: 0.5; cursor: not-allowed; }
-        .fact {
-            background: rgba(46,125,50,0.3);
-            padding: 16px;
-            border-radius: 24px;
-            margin-top: 16px;
-            display: none;
-            border-left: 3px solid #4caf50;
-            font-size: 0.9rem;
-            line-height: 1.4;
-        }
-        .task {
-            background: rgba(25,118,210,0.2);
-            padding: 14px;
-            border-radius: 20px;
-            margin: 16px 0;
-            font-size: 0.9rem;
-        }
-        .hint {
-            background: rgba(255,152,0,0.2);
-            padding: 12px;
-            border-radius: 20px;
-            margin-top: 12px;
-            font-size: 0.85rem;
-            color: #ffb74d;
-            display: none;
-        }
-
-        /* AI Button */
-        .ai-button {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #b8860b, #ffd966);
-            color: #1a1a2e;
-            font-size: 28px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-            z-index: 1500;
-            border: none;
-            transition: transform 0.2s;
-        }
-        .ai-button:hover { transform: scale(1.05); }
-
-        /* Chat Modal */
-        .chat-modal {
-            position: fixed;
-            bottom: 90px;
-            right: 20px;
-            width: 320px;
-            max-width: calc(100% - 40px);
-            background: #1e1e2e;
-            border-radius: 24px;
-            box-shadow: 0 12px 32px rgba(0,0,0,0.4);
-            z-index: 1501;
-            display: none;
-            flex-direction: column;
-            border: 1px solid rgba(255,255,255,0.1);
-            overflow: hidden;
-        }
-        .chat-header {
-            background: #b8860b;
-            padding: 14px;
-            font-weight: bold;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .chat-close {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 20px;
-            cursor: pointer;
-            width: auto;
-        }
-        .chat-messages {
-            height: 280px;
-            overflow-y: auto;
-            padding: 12px;
-            background: #0f0f1a;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        .message {
-            max-width: 85%;
-            padding: 10px 14px;
-            border-radius: 20px;
-            font-size: 13px;
-        }
-        .user-message { background: #b8860b; color: white; align-self: flex-end; }
-        .bot-message { background: #2a2a3a; color: #eee; align-self: flex-start; }
-        .chat-input-area { display: flex; padding: 12px; background: #1e1e2e; border-top: 1px solid rgba(255,255,255,0.1); }
-        .chat-input { flex: 1; padding: 10px; border-radius: 30px; border: none; background: #2a2a3a; color: white; }
-        .chat-send { width: auto; background: #b8860b; margin-left: 8px; padding: 10px 18px; }
-
-        /* Intro Overlay */
-        .intro-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.85);
-            backdrop-filter: blur(8px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-            padding: 20px;
-        }
-        .intro-card {
-            background: #1a1a2e;
-            max-width: 550px;
-            max-height: 85%;
-            overflow-y: auto;
-            border-radius: 40px;
-            padding: 28px;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        .intro-card h2 { color: #ffd966; margin-bottom: 16px; }
-        .intro-card hr { margin: 16px 0; border-color: rgba(255,255,255,0.1); }
-        .calories-badge {
-            background: rgba(184,134,11,0.2);
-            border-radius: 40px;
-            padding: 10px 16px;
-            text-align: center;
-            margin: 16px 0;
-        }
-        .close-intro { background: #b8860b; margin-top: 20px; }
-
-        .final-message {
-            background: linear-gradient(135deg, #1a472a, #0d2616);
-            border-radius: 32px;
-            padding: 28px;
-            text-align: center;
-        }
-        .trophy { font-size: 70px; margin: 20px 0; }
-        .toast {
-            visibility: hidden;
-            min-width: 200px;
-            background: #333;
-            color: #fff;
-            text-align: center;
-            border-radius: 40px;
-            padding: 12px;
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 1000;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-        .toast.show { visibility: visible; opacity: 0.95; }
-
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #aaa;
-        }
-        .spinner {
-            display: inline-block;
-            width: 40px;
-            height: 40px;
-            border: 3px solid rgba(255,255,255,0.3);
-            border-radius: 50%;
-            border-top-color: #b8860b;
-            animation: spin 1s ease-in-out infinite;
-        }
+        button { background: linear-gradient(135deg, #b8860b, #8b6508); color: white; border: none; padding: 14px 20px; border-radius: 60px; font-size: 16px; font-weight: 600; cursor: pointer; width: 100%; }
+        .fact { background: rgba(46,125,50,0.3); padding: 16px; border-radius: 24px; margin-top: 16px; display: none; }
+        .hint { background: rgba(255,152,0,0.2); padding: 12px; border-radius: 20px; margin-top: 12px; color: #ffb74d; display: none; }
+        .loading { text-align: center; padding: 40px; color: #aaa; }
+        .spinner { display: inline-block; width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: #b8860b; animation: spin 1s ease-in-out infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
+        .lang-bar { display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 16px; }
+        .lang-btn { background: rgba(255,255,255,0.1); border: none; border-radius: 40px; padding: 6px 14px; cursor: pointer; color: #ddd; }
+        .lang-btn.active { background: #b8860b; color: white; }
+        .ai-button { position: fixed; bottom: 20px; right: 20px; width: 56px; height: 56px; border-radius: 50%; background: #b8860b; color: white; font-size: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 1000; border: none; }
+        .chat-modal { position: fixed; bottom: 90px; right: 20px; width: 300px; background: #1e1e2e; border-radius: 20px; z-index: 1001; display: none; flex-direction: column; border: 1px solid rgba(255,255,255,0.1); }
+        .chat-header { background: #b8860b; padding: 12px; font-weight: bold; display: flex; justify-content: space-between; }
+        .chat-close { background: none; border: none; color: white; font-size: 18px; cursor: pointer; }
+        .chat-messages { height: 250px; overflow-y: auto; padding: 12px; background: #0f0f1a; }
+        .message { padding: 8px 12px; border-radius: 16px; margin-bottom: 8px; max-width: 85%; }
+        .user-message { background: #b8860b; color: white; align-self: flex-end; text-align: right; }
+        .bot-message { background: #2a2a3a; color: #eee; }
+        .chat-input-area { display: flex; padding: 12px; gap: 8px; }
+        .chat-input { flex: 1; padding: 8px; border-radius: 30px; border: none; background: #2a2a3a; color: white; }
+        .chat-send { width: auto; background: #b8860b; padding: 8px 16px; }
+        .intro-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: flex; align-items: center; justify-content: center; z-index: 2000; }
+        .intro-card { background: #1a1a2e; max-width: 500px; border-radius: 32px; padding: 28px; }
+        .close-intro { margin-top: 20px; }
+        .final-message { background: linear-gradient(135deg, #1a472a, #0d2616); border-radius: 32px; padding: 28px; text-align: center; }
+        .trophy { font-size: 60px; margin: 16px 0; }
+        .toast { visibility: hidden; min-width: 200px; background: #333; color: #fff; text-align: center; border-radius: 40px; padding: 12px; position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 1000; opacity: 0; transition: opacity 0.3s; }
+        .toast.show { visibility: visible; opacity: 0.95; }
     </style>
 </head>
 <body>
 <div class="container">
     <div class="header">
-        <h1>🗺️ QuestHub</h1>
-        <p>Городские квесты с загадками и AI-помощником</p>
+        <h1>🗝️ Тайны Тобольска</h1>
     </div>
-
-    <!-- Селектор города -->
-    <div id="citySelector" class="city-selector">
-        <h3>🌆 Выберите город</h3>
-        <div id="cityGrid" class="city-grid"></div>
-    </div>
-
-    <!-- Панель языков -->
     <div class="lang-bar">
         <button class="lang-btn" data-lang="ru">🇷🇺 Русский</button>
         <button class="lang-btn" data-lang="en">🇬🇧 English</button>
         <button class="lang-btn" data-lang="kk">🇰🇿 Қазақша</button>
     </div>
 
-    <!-- Панель баллов -->
+    <div id="citySelector" class="city-selector">
+        <h3>🌆 Выберите город</h3>
+        <div id="cityGrid" class="city-grid"></div>
+    </div>
+
     <div class="score-panel">
         <div class="score-item">⭐ <span id="totalScore">0</span></div>
         <div class="score-item">✅ <span id="completedCount">0</span>/<span id="totalPoints">0</span></div>
@@ -397,99 +94,110 @@
 <button class="ai-button" id="aiButton">🤖</button>
 <div id="chatModal" class="chat-modal">
     <div class="chat-header"><span id="chatTitle">🤖 AI-помощник</span><button class="chat-close" id="chatClose">✕</button></div>
-    <div id="chatMessages" class="chat-messages"><div class="message bot-message" id="welcomeMsg">Здравствуйте! Я помогу с вопросами по квесту.</div></div>
+    <div id="chatMessages" class="chat-messages"><div class="message bot-message">Здравствуйте! Я помогу с вопросами по квесту.</div></div>
     <div class="chat-input-area"><input type="text" id="chatInput" class="chat-input" placeholder="Напишите вопрос..."><button id="chatSend" class="chat-send">➤</button></div>
 </div>
 
-<div id="introOverlay" class="intro-overlay"><div class="intro-card" id="introCard"></div></div>
+<div id="introOverlay" class="intro-overlay" style="display:none;"><div class="intro-card" id="introCard"></div></div>
 
 <script>
-    // ==================== ГЛОБАЛЬНОЕ СОСТОЯНИЕ ====================
+    // Данные о городах
+    const citiesData = {
+        tobolsk: {
+            name: { ru: "Тобольск", en: "Tobolsk", kk: "Тобыл" },
+            description: { ru: "Древняя столица Сибири", en: "Ancient capital of Siberia", kk: "Сібірдің ежелгі астанасы" },
+            active: true,
+            routeDistance: 6.3,
+            estimatedTime: 1.9,
+            calories: 360,
+            totalPoints: 12,
+            maxScore: 36,
+            stepsUrl: "data/tobolsk.json"
+        }
+    };
+
     let currentCity = null;
     let currentLang = 'ru';
+    let currentSteps = [];
+    let currentFacts = [];
     let currentIndex = 0;
     let scores = [];
     let attempts = [];
     let completed = [];
     let hintShown = [];
     let totalScore = 0;
-    let totalPoints = 0;
-    
-    let citiesList = [];
-    let currentCityData = null;
-    let currentSteps = null;
-    let currentFacts = null;
-    
-    let isLoading = false;
-    
-    // DOM элементы
+
     let stepsContainer, totalSpan, completedSpan, totalPointsSpan, progressBar, congratsDiv, cityGrid;
 
-    // ==================== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ====================
-    function saveState() {
-        if (!currentCity) return;
-        const state = {
-            currentIndex, scores, attempts, completed, hintShown, totalScore, currentLang,
-            currentCity, totalPoints
+    function showMessage(msg) {
+        const toast = document.getElementById('toastMsg');
+        toast.innerText = msg;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+
+    function renderCitySelector() {
+        if (!cityGrid) return;
+        cityGrid.innerHTML = '';
+        for (const [id, city] of Object.entries(citiesData)) {
+            if (!city.active) continue;
+            const card = document.createElement('div');
+            card.className = 'city-card';
+            card.innerHTML = `<div style="font-size:32px;">🏙️</div><div><strong>${city.name.ru}</strong></div><div style="font-size:12px;">${city.routeDistance} км • ${city.totalPoints} точек</div>`;
+            card.onclick = () => loadCity(id, city);
+            cityGrid.appendChild(card);
+        }
+    }
+
+    async function loadCity(cityId, city) {
+        stepsContainer.innerHTML = '<div class="loading"><div class="spinner"></div><br>Загрузка города...</div>';
+        try {
+            const response = await fetch(city.stepsUrl);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const data = await response.json();
+            currentCity = cityId;
+            currentSteps = data.steps.ru || [];
+            currentFacts = data.facts.ru || [];
+            
+            const stepsCount = currentSteps.length;
+            scores = new Array(stepsCount).fill(0);
+            attempts = new Array(stepsCount).fill(0);
+            completed = new Array(stepsCount).fill(false);
+            hintShown = new Array(stepsCount).fill(false);
+            totalScore = 0;
+            currentIndex = 0;
+            
+            // Показать приветствие
+            showIntro(city);
+            
+            updateUI();
+            renderCurrentQuestion();
+        } catch(e) {
+            stepsContainer.innerHTML = `<div class="loading">❌ Ошибка: ${e.message}<br>Проверьте файл ${city.stepsUrl}</div>`;
+            console.error(e);
+        }
+    }
+
+    function showIntro(city) {
+        const introCard = document.getElementById('introCard');
+        introCard.innerHTML = `
+            <h2>🏰 Добро пожаловать в квест по ${city.name.ru}!</h2>
+            <p>${city.description.ru}</p>
+            <hr>
+            <p>📍 Протяжённость: ${city.routeDistance} км</p>
+            <p>⏱️ Время: ${city.estimatedTime} часа</p>
+            <p>🔥 ≈ ${city.calories} ккал (примерно как 1.5 бургера!)</p>
+            <p>⭐ Правила: 3 балла с 1 попытки, 2 со 2-й, 1 с 3-й. Максимум: ${city.maxScore} баллов.</p>
+            <button id="closeIntro" class="close-intro">Начать квест →</button>
+        `;
+        document.getElementById('introOverlay').style.display = 'flex';
+        document.getElementById('closeIntro').onclick = () => {
+            document.getElementById('introOverlay').style.display = 'none';
         };
-        localStorage.setItem('quest_state', JSON.stringify(state));
-        // Сохраняем отдельно прогресс города
-        const cityProgress = { scores, attempts, completed, hintShown, totalScore, currentIndex };
-        localStorage.setItem(`city_${currentCity}_progress`, JSON.stringify(cityProgress));
-    }
-
-    function loadSavedState() {
-        const saved = localStorage.getItem('quest_state');
-        if (saved) {
-            try {
-                const s = JSON.parse(saved);
-                if (s.currentCity) {
-                    currentCity = s.currentCity;
-                    currentLang = s.currentLang || 'ru';
-                    currentIndex = s.currentIndex || 0;
-                    scores = s.scores || [];
-                    attempts = s.attempts || [];
-                    completed = s.completed || [];
-                    hintShown = s.hintShown || [];
-                    totalScore = s.totalScore || 0;
-                    totalPoints = s.totalPoints || 0;
-                    return true;
-                }
-            } catch(e) {}
-        }
-        return false;
-    }
-
-    function loadCityProgress(cityId) {
-        const saved = localStorage.getItem(`city_${cityId}_progress`);
-        if (saved) {
-            try {
-                const p = JSON.parse(saved);
-                scores = p.scores || [];
-                attempts = p.attempts || [];
-                completed = p.completed || [];
-                hintShown = p.hintShown || [];
-                totalScore = p.totalScore || 0;
-                currentIndex = p.currentIndex || 0;
-                return true;
-            } catch(e) {}
-        }
-        return false;
-    }
-
-    function resetStateForCity(cityData) {
-        const stepsCount = cityData.steps.ru.length;
-        scores = Array(stepsCount).fill(0);
-        attempts = Array(stepsCount).fill(0);
-        completed = Array(stepsCount).fill(false);
-        hintShown = Array(stepsCount).fill(false);
-        totalScore = 0;
-        currentIndex = 0;
-        totalPoints = stepsCount * 3;
     }
 
     function updateUI() {
-        if (!currentCityData) return;
+        if (!currentSteps.length) return;
         totalSpan.innerText = totalScore;
         const compCount = completed.filter(c => c === true).length;
         completedSpan.innerText = `${compCount}/${currentSteps.length}`;
@@ -497,46 +205,33 @@
         const percent = (compCount / currentSteps.length) * 100;
         progressBar.style.width = percent + "%";
         if (compCount === currentSteps.length && currentSteps.length > 0) showFinalScreen();
-        saveState();
     }
 
     function showFinalScreen() {
         const maxScore = currentSteps.length * 3;
         congratsDiv.innerHTML = `
             <div class="trophy">${totalScore === maxScore ? '🏆✨ ЗОЛОТОЙ КУБОК ✨🏆' : '⭐🏅⭐'}</div>
-            <strong>${totalScore === maxScore ? '🎉 ПОЗДРАВЛЯЕМ! ВЫ СУПЕР ЭРУДИТ! 🎉' : 'Квест пройден!'}</strong>
+            <strong>${totalScore === maxScore ? '🎉 ПОЗДРАВЛЯЕМ! 🎉' : 'Квест пройден!'}</strong>
             <br>Вы набрали ${totalScore}/${maxScore} баллов.
             <br><br>
-            <button id="shareBtn" class="close-intro" style="background:#2c6e2c;">📤 Поделиться</button>
-            <button id="resetBtn" style="margin-top:10px;">🔄 Пройти заново</button>
+            <button id="resetBtn">🔄 Пройти заново</button>
         `;
         congratsDiv.style.display = 'block';
-        document.getElementById('shareBtn')?.addEventListener('click', () => {
-            if (navigator.share) {
-                navigator.share({ title: currentCityData.name.ru, text: `Я прошёл квест и набрал ${totalScore}/${maxScore} баллов!` });
-            } else {
-                const toast = document.getElementById('toastMsg');
-                toast.classList.add('show');
-                setTimeout(() => toast.classList.remove('show'), 2000);
-            }
-        });
         document.getElementById('resetBtn')?.addEventListener('click', () => {
-            resetStateForCity(currentCityData);
+            scores.fill(0);
+            attempts.fill(0);
+            completed.fill(false);
+            hintShown.fill(false);
+            totalScore = 0;
+            currentIndex = 0;
             renderCurrentQuestion();
             updateUI();
+            congratsDiv.style.display = 'none';
         });
     }
 
-    function showMessage(text, isError = false) {
-        const toast = document.getElementById('toastMsg');
-        toast.innerText = text;
-        toast.classList.add('show');
-        setTimeout(() => toast.classList.remove('show'), 2000);
-    }
-
-    // ==================== ОСНОВНЫЕ ФУНКЦИИ КВЕСТА ====================
     function renderCurrentQuestion() {
-        if (!currentSteps || currentSteps.length === 0) return;
+        if (!currentSteps.length) return;
         stepsContainer.innerHTML = '';
         const step = currentSteps[currentIndex];
         const isCompleted = completed[currentIndex];
@@ -547,15 +242,15 @@
             <div class="step-header">
                 <span class="step-number">Точка ${currentIndex+1}/${currentSteps.length}</span>
                 <span class="step-title">${step.title}</span>
-                <span class="step-address">📍 ${step.address || 'Адрес уточняется'}</span>
+                <span class="step-address">📍 ${step.address || ''}</span>
             </div>
-            ${step.task ? `<div class="task">📋 ${step.task}</div>` : ''}
+            ${step.task ? `<div class="task" style="background:rgba(0,0,0,0.2); padding:12px; border-radius:20px; margin:10px 0;">📋 ${step.task}</div>` : ''}
             <div class="riddle">${step.riddle}</div>
             <input type="text" id="answerInput" placeholder="Введите ответ" ${isCompleted ? 'disabled' : ''} autocomplete="off">
             <button id="checkBtn" ${isCompleted ? 'disabled' : ''}>Проверить</button>
             <div id="hintMsg" class="hint"></div>
             <div id="factMsg" class="fact"></div>
-            <div id="nextTaskMsg" class="task" style="display:none;"></div>
+            <div id="nextTaskMsg" style="background:rgba(0,0,0,0.2); padding:12px; border-radius:20px; margin:16px 0; display:none;"></div>
             <button id="nextBtn" style="display:none;">➡️ Следующий вопрос</button>
         `;
         stepsContainer.appendChild(div);
@@ -578,20 +273,17 @@
                 currentIndex++;
                 renderCurrentQuestion();
                 updateUI();
-            } else if (completed.every(c => c === true)) {
-                showFinalScreen();
             }
         };
         
         if (isCompleted && currentIndex + 1 < currentSteps.length) {
-            if (nextBtn) nextBtn.style.display = 'block';
+            const nextBtnEl = document.getElementById('nextBtn');
+            if (nextBtnEl) nextBtnEl.style.display = 'block';
             const nextTaskDiv = document.getElementById('nextTaskMsg');
             if (nextTaskDiv && step.nextTask) {
                 nextTaskDiv.innerHTML = `✅ Далее: ${step.nextTask}`;
                 nextTaskDiv.style.display = 'block';
             }
-        } else if (isCompleted && currentIndex + 1 === currentSteps.length) {
-            showFinalScreen();
         }
     }
 
@@ -607,7 +299,7 @@
         attempts[currentIndex] = curAttempt;
         
         if (hintShown[currentIndex]) {
-            showMessage('Этот вопрос уже закрыт с 0 баллов', true);
+            showMessage('Этот вопрос уже закрыт');
             return;
         }
         
@@ -618,7 +310,7 @@
             completed[currentIndex] = true;
             
             const factDiv = document.getElementById('factMsg');
-            const factText = currentFacts && currentFacts[currentIndex] ? currentFacts[currentIndex] : 'Интересный факт об этом месте.';
+            const factText = currentFacts[currentIndex] || 'Интересный факт об этом месте.';
             factDiv.innerHTML = `<strong>📜 Историческая справка:</strong><br>${factText}<br>+${points} баллов`;
             factDiv.style.display = 'block';
             
@@ -646,8 +338,8 @@
                 completed[currentIndex] = true;
                 
                 const factDiv = document.getElementById('factMsg');
-                const factText = currentFacts && currentFacts[currentIndex] ? currentFacts[currentIndex] : 'Историческая справка.';
-                factDiv.innerHTML = `<strong>📜 Историческая справка:</strong><br>${factText}<br>⚠️ Использована подсказка — 0 баллов`;
+                const factText = currentFacts[currentIndex] || '';
+                factDiv.innerHTML = `<strong>📜 Историческая справка:</strong><br>${factText}<br>⚠️ 0 баллов`;
                 factDiv.style.display = 'block';
                 
                 const checkBtn = document.getElementById('checkBtn');
@@ -655,128 +347,24 @@
                 if (checkBtn) checkBtn.disabled = true;
                 if (answerInput) answerInput.disabled = true;
                 
-                const nextTaskDiv = document.getElementById('nextTaskMsg');
-                if (nextTaskDiv && step.nextTask) {
-                    nextTaskDiv.innerHTML = `✅ Далее: ${step.nextTask}`;
-                    nextTaskDiv.style.display = 'block';
-                }
                 const nextBtn = document.getElementById('nextBtn');
                 if (nextBtn) nextBtn.style.display = 'block';
                 updateUI();
             } else {
-                showMessage(`❌ Неверно. Осталось попыток: ${3 - curAttempt}`, true);
+                showMessage(`❌ Неверно. Осталось попыток: ${3 - curAttempt}`);
                 input.value = '';
                 input.focus();
             }
         }
     }
 
-    // ==================== ЗАГРУЗКА ДАННЫХ ГОРОДА ====================
-    async function loadCitiesList() {
-        try {
-            const response = await fetch('cities.json');
-            const data = await response.json();
-            citiesList = data.cities;
-            renderCitySelector();
-        } catch(e) {
-            console.error('Ошибка загрузки списка городов:', e);
-            citiesList = [];
-        }
-    }
-
-    function renderCitySelector() {
-        if (!cityGrid) return;
-        cityGrid.innerHTML = '';
-        for (const city of citiesList) {
-            const card = document.createElement('div');
-            card.className = `city-card ${!city.active ? 'disabled' : ''} ${currentCity === city.id ? 'active' : ''}`;
-            if (city.active) {
-                card.onclick = () => switchCity(city.id);
-            }
-            card.innerHTML = `
-                <div class="city-icon">🏙️</div>
-                <div class="city-name">${city.name.ru}</div>
-                <div class="city-desc">${city.shortDescription.ru}</div>
-                <div class="city-desc">${city.routeDistance} км • ${city.totalPoints} точек</div>
-                ${!city.active ? '<div class="badge">Скоро</div>' : ''}
-            `;
-            cityGrid.appendChild(card);
-        }
-    }
-
-    async function switchCity(cityId) {
-        if (isLoading) return;
-        const cityInfo = citiesList.find(c => c.id === cityId);
-        if (!cityInfo || !cityInfo.active) return;
-        
-        isLoading = true;
-        stepsContainer.innerHTML = '<div class="loading"><div class="spinner"></div><br>Загрузка города...</div>';
-        
-        try {
-            const response = await fetch(`data/${cityId}.json`);
-            const cityData = await response.json();
-            currentCityData = cityData;
-            currentCity = cityId;
-            currentSteps = cityData.steps[currentLang] || cityData.steps.ru;
-            currentFacts = cityData.facts[currentLang] || cityData.facts.ru;
-            
-            // Загружаем сохранённый прогресс или создаём новый
-            if (!loadCityProgress(cityId)) {
-                resetStateForCity(currentCityData);
-            } else {
-                // проверяем длину массивов
-                if (scores.length !== currentSteps.length) {
-                    resetStateForCity(currentCityData);
-                }
-            }
-            
-            renderCitySelector();
-            renderCurrentQuestion();
-            updateUI();
-            
-            // Показать приветствие для города
-            showCityIntro(cityInfo);
-        } catch(e) {
-            console.error('Ошибка загрузки города:', e);
-            stepsContainer.innerHTML = '<div class="loading">❌ Ошибка загрузки. Попробуйте позже.</div>';
-        }
-        isLoading = false;
-    }
-
-    function showCityIntro(cityInfo) {
-        const t = {
-            ru: { title: `🏰 Добро пожаловать в квест по ${cityInfo.name.ru}!` }
-        };
-        const introCard = document.getElementById('introCard');
-        introCard.innerHTML = `
-            <h2>${t.ru.title}</h2>
-            <p>${cityInfo.shortDescription.ru}</p>
-            <hr>
-            <p>📍 Протяжённость маршрута: ${cityInfo.routeDistance} км</p>
-            <p>⏱️ Время прохождения: ${cityInfo.estimatedTime} часа</p>
-            <div class="calories-badge">🔥 ≈ ${cityInfo.calories} ккал (примерно как ${Math.round(cityInfo.calories/300)} бургеров!)</div>
-            <p>⭐ Правила: 3 балла с 1 попытки, 2 со 2-й, 1 с 3-й.<br>🎯 Максимум: ${cityInfo.maxScore} баллов.</p>
-            <button id="closeIntro" class="close-intro">Начать квест →</button>
-        `;
-        document.getElementById('introOverlay').style.display = 'flex';
-        document.getElementById('closeIntro').onclick = () => {
-            document.getElementById('introOverlay').style.display = 'none';
-        };
-    }
-
-    // ==================== ЯЗЫКИ И ЧАТ ====================
     function setLanguage(lang) {
         currentLang = lang;
         document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
         document.querySelector(`.lang-btn[data-lang="${lang}"]`).classList.add('active');
-        
-        if (currentCityData) {
-            currentSteps = currentCityData.steps[lang] || currentCityData.steps.ru;
-            currentFacts = currentCityData.facts[lang] || currentCityData.facts.ru;
-            renderCurrentQuestion();
+        if (currentCity && citiesData[currentCity]) {
+            // Обновить заголовки при необходимости
         }
-        updateUI();
-        saveState();
     }
 
     function initChat() {
@@ -800,16 +388,10 @@
         
         function getBotAnswer(question) {
             const q = question.toLowerCase();
-            if (q.includes('балл') || q.includes('очк') || q.includes('правил')) {
-                return 'Баллы начисляются: 3 (1 попытка), 2 (2), 1 (3). После 3 ошибок — подсказка и 0 баллов.';
-            }
-            if (q.includes('где') || q.includes('искать') || q.includes('найти')) {
-                return 'Каждая точка — реальный объект в городе. Читайте загадку и ищите подсказки на табличках, памятниках или информационных стендах.';
-            }
-            if (q.includes('маршрут') || q.includes('протяж')) {
-                return currentCityData ? `Маршрут长约 ${currentCityData.routeDistance} км, время ~${currentCityData.estimatedTime} часа.` : 'Маршрут загружается.';
-            }
-            return 'Я AI-помощник квеста. Внимательно читайте загадки, ищите таблички и памятники. Удачи!';
+            if (q.includes('балл') || q.includes('правил')) return 'Баллы: 3 (1 попытка), 2 (2), 1 (3). После 3 ошибок — подсказка и 0 баллов.';
+            if (q.includes('где') || q.includes('искать')) return 'Каждая точка — реальный объект в городе. Ищите таблички, памятники, информационные стенды.';
+            if (q.includes('маршрут') && currentCity && citiesData[currentCity]) return `Маршрут ${citiesData[currentCity].routeDistance} км, время ~${citiesData[currentCity].estimatedTime} часа.`;
+            return 'Я AI-помощник квеста. Внимательно читайте загадки, ищите подсказки на месте. Удачи!';
         }
         
         chatSend.onclick = () => {
@@ -823,8 +405,7 @@
         chatInput.onkeypress = (e) => { if (e.key === 'Enter') chatSend.click(); };
     }
 
-    // ==================== ИНИЦИАЛИЗАЦИЯ ====================
-    document.addEventListener('DOMContentLoaded', async () => {
+    document.addEventListener('DOMContentLoaded', () => {
         stepsContainer = document.getElementById('stepsContainer');
         totalSpan = document.getElementById('totalScore');
         completedSpan = document.getElementById('completedCount');
@@ -834,38 +415,15 @@
         cityGrid = document.getElementById('cityGrid');
         
         initChat();
-        await loadCitiesList();
-        
-        const hadSaved = loadSavedState();
-        if (hadSaved && currentCity) {
-            // Загружаем данные выбранного города
-            try {
-                const response = await fetch(`data/${currentCity}.json`);
-                const cityData = await response.json();
-                currentCityData = cityData;
-                currentSteps = cityData.steps[currentLang] || cityData.steps.ru;
-                currentFacts = cityData.facts[currentLang] || cityData.facts.ru;
-                loadCityProgress(currentCity);
-                renderCurrentQuestion();
-                updateUI();
-            } catch(e) {
-                console.error('Ошибка загрузки сохранённого города:', e);
-            }
-        }
+        renderCitySelector();
         
         document.querySelectorAll('.lang-btn').forEach(btn => {
             btn.addEventListener('click', () => setLanguage(btn.dataset.lang));
-            if (btn.dataset.lang === currentLang) btn.classList.add('active');
+            if (btn.dataset.lang === 'ru') btn.classList.add('active');
         });
         
-        // Если нет сохранённого города, показываем селектор
-        if (!currentCity) {
-            stepsContainer.innerHTML = '<div class="loading">🏙️ Выберите город из списка выше</div>';
-        }
+        stepsContainer.innerHTML = '<div class="loading">🏙️ Выберите город из списка выше</div>';
     });
-    
-    // Service Worker для PWA
-    // Service Worker временно отключен
 </script>
 </body>
 </html>
