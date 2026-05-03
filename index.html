@@ -46,11 +46,65 @@
         .lang-btn { background: rgba(255,255,255,0.1); border: none; border-radius: 40px; padding: 8px 16px; cursor: pointer; color: #ddd; font-size: 14px; font-weight: 500; transition: 0.2s; }
         .lang-btn:hover { background: rgba(255,255,255,0.2); }
         .lang-btn.active { background: #b8860b; color: white; }
-        .ai-button { position: fixed; bottom: 20px; right: 20px; width: 56px; height: 56px; border-radius: 50%; background: #b8860b; color: white; font-size: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 1000; border: none; transition: transform 0.2s; }
-        .ai-button:hover { transform: scale(1.05); }
-        .chat-modal { position: fixed; bottom: 90px; right: 20px; width: 320px; background: #1e1e2e; border-radius: 20px; z-index: 1001; display: none; flex-direction: column; border: 1px solid rgba(255,255,255,0.1); overflow: hidden; }
-        .chat-header { background: #b8860b; padding: 12px 16px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
-        .chat-close { background: none; border: none; color: white; font-size: 20px; cursor: pointer; width: auto; }
+        
+        /* Кнопки AI и обратной связи */
+        .bottom-buttons {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            gap: 12px;
+            z-index: 1000;
+        }
+        .round-btn {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: #b8860b;
+            color: white;
+            font-size: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            border: none;
+            transition: transform 0.2s;
+        }
+        .round-btn:hover { transform: scale(1.05); }
+        .feedback-btn { background: #2c6e2c; }
+        
+        .chat-modal, .feedback-modal {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 320px;
+            background: #1e1e2e;
+            border-radius: 20px;
+            z-index: 1001;
+            display: none;
+            flex-direction: column;
+            border: 1px solid rgba(255,255,255,0.1);
+            overflow: hidden;
+        }
+        .modal-header { background: #b8860b; padding: 12px 16px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+        .modal-close { background: none; border: none; color: white; font-size: 20px; cursor: pointer; width: auto; }
+        .modal-content { padding: 16px; }
+        .feedback-option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 16px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .feedback-option:hover { background: rgba(184,134,11,0.3); }
+        .feedback-icon { font-size: 28px; }
+        .feedback-text { flex: 1; }
+        .feedback-text small { font-size: 11px; color: #aaa; display: block; }
         .chat-messages { height: 280px; overflow-y: auto; padding: 12px; background: #0f0f1a; display: flex; flex-direction: column; gap: 8px; }
         .message { padding: 10px 14px; border-radius: 18px; max-width: 85%; font-size: 13px; }
         .user-message { background: #b8860b; color: white; align-self: flex-end; }
@@ -98,11 +152,53 @@
     <div id="toastMsg" class="toast">📋 Скопировано</div>
 </div>
 
-<button class="ai-button" id="aiButton">🤖</button>
+<div class="bottom-buttons">
+    <button class="round-btn feedback-btn" id="feedbackButton">💬</button>
+    <button class="round-btn" id="aiButton">🤖</button>
+</div>
+
+<!-- Модальное окно AI-помощника -->
 <div id="chatModal" class="chat-modal">
-    <div class="chat-header"><span id="chatTitle">🤖 AI-помощник</span><button class="chat-close" id="chatClose">✕</button></div>
+    <div class="modal-header"><span>🤖 AI-помощник</span><button class="modal-close" id="chatClose">✕</button></div>
     <div id="chatMessages" class="chat-messages"><div class="message bot-message">Здравствуйте! Я помогу с вопросами по квесту. Спрашивайте о маршруте, загадках, баллах.</div></div>
     <div class="chat-input-area"><input type="text" id="chatInput" class="chat-input" placeholder="Напишите вопрос..."><button id="chatSend" class="chat-send">➤</button></div>
+</div>
+
+<!-- Модальное окно обратной связи -->
+<div id="feedbackModal" class="feedback-modal">
+    <div class="modal-header"><span>💬 Обратная связь</span><button class="modal-close" id="feedbackClose">✕</button></div>
+    <div class="modal-content">
+        <p style="margin-bottom: 16px;">🙏 <strong>Спасибо, что проходите наш квест!</strong></p>
+        <p style="margin-bottom: 16px; font-size: 14px; color: #ccc;">Мы очень ценим ваше мнение. Если у вас есть идеи, замечания или вы нашли ошибку — напишите нам. Это поможет сделать квест лучше для всех!</p>
+        <hr style="margin: 16px 0; border-color: rgba(255,255,255,0.1);">
+        
+        <div class="feedback-option" id="feedbackTelegram">
+            <div class="feedback-icon">📱</div>
+            <div class="feedback-text">
+                <strong>Написать в Telegram</strong>
+                <small>Для вопросов и пожеланий</small>
+            </div>
+            <div>➤</div>
+        </div>
+        
+        <div class="feedback-option" id="feedbackEmailCopy">
+            <div class="feedback-icon">📧</div>
+            <div class="feedback-text">
+                <strong>Скопировать email</strong>
+                <small>quest.feedback@example.com</small>
+            </div>
+            <div>📋</div>
+        </div>
+        
+        <div class="feedback-option" id="feedbackTextCopy">
+            <div class="feedback-icon">✏️</div>
+            <div class="feedback-text">
+                <strong>Скопировать шаблон письма</strong>
+                <small>Со всеми детлями квеста</small>
+            </div>
+            <div>📋</div>
+        </div>
+    </div>
 </div>
 
 <div id="introOverlay" class="intro-overlay" style="display:none;"><div class="intro-card" id="introCard"></div></div>
@@ -494,6 +590,7 @@
         saveProgress();
     }
 
+    // ==================== AI-ЧАТ ====================
     function initChat() {
         const aiButton = document.getElementById('aiButton');
         const chatModal = document.getElementById('chatModal');
@@ -524,7 +621,10 @@
             if (q.includes('маршрут') && currentCity) {
                 return `Маршрут ${currentCity.routeDistance} км, время ~${currentCity.estimatedTime} часа.`;
             }
-            return 'Я AI-помощник квеста. Внимательно читайте загадки, ищите подсказки на месте. Удачи!';
+            if (q.includes('обратная связь') || q.includes('жалоб') || q.includes('пожела')) {
+                return 'Вы можете оставить отзыв, нажав на кнопку 💬 в правом нижнем углу. Мы очень ценим ваше мнение!';
+            }
+            return 'Я AI-помощник квеста. Внимательно читайте загадки, ищите подсказки на месте. Если хотите оставить отзыв — нажмите кнопку 💬. Удачи!';
         }
         
         chatSend.onclick = () => {
@@ -536,6 +636,52 @@
             chatInput.value = '';
         };
         chatInput.onkeypress = (e) => { if (e.key === 'Enter') chatSend.click(); };
+    }
+
+    // ==================== ОБРАТНАЯ СВЯЗЬ ====================
+    function initFeedback() {
+        const feedbackBtn = document.getElementById('feedbackButton');
+        const feedbackModal = document.getElementById('feedbackModal');
+        const feedbackClose = document.getElementById('feedbackClose');
+        
+        // Настройки (замените на свои)
+        const TELEGRAM_LINK = 'https://t.me/your_quest_bot';  // Замените на ссылку вашего Telegram-бота или чата
+        const FEEDBACK_EMAIL = 'quest.feedback@example.com';   // Замените на ваш email
+        
+        feedbackBtn.onclick = () => { feedbackModal.style.display = 'flex'; };
+        feedbackClose.onclick = () => { feedbackModal.style.display = 'none'; };
+        
+        // Telegram
+        document.getElementById('feedbackTelegram').onclick = () => {
+            window.open(TELEGRAM_LINK, '_blank');
+            feedbackModal.style.display = 'none';
+        };
+        
+        // Копирование email
+        document.getElementById('feedbackEmailCopy').onclick = () => {
+            navigator.clipboard.writeText(FEEDBACK_EMAIL);
+            showMessage('📧 Email скопирован!');
+            feedbackModal.style.display = 'none';
+        };
+        
+        // Копирование шаблона письма
+        document.getElementById('feedbackTextCopy').onclick = () => {
+            const template = `Тема: [Квест] Отзыв / Пожелание / Жалоба
+
+Здравствуйте, команда квеста «Тайны вашего города»!
+
+Играл в городе: ${currentCity ? (currentCity.name.ru || 'не выбран') : 'не выбран'}
+Версия квеста: 1.0
+
+Мои впечатления / идеи / замечания:
+
+---
+(напишите здесь своё сообщение)`;
+
+            navigator.clipboard.writeText(template);
+            showMessage('✏️ Шаблон скопирован! Осталось вставить в письмо.');
+            feedbackModal.style.display = 'none';
+        };
     }
 
     // ==================== ИНИЦИАЛИЗАЦИЯ ====================
@@ -552,6 +698,7 @@
         selectCityTitleEl = document.getElementById('selectCityTitle');
         
         initChat();
+        initFeedback();
         renderCitySelector();
         
         document.querySelectorAll('.lang-btn').forEach(btn => {
