@@ -575,4 +575,52 @@
     document.addEventListener('DOMContentLoaded', async () => {
         stepsContainer = document.getElementById('stepsContainer');
         totalSpan = document.getElementById('totalScore');
-        completedSpan
+        completedSpan = document.getElementById('completedCount');
+        totalPointsSpan = document.getElementById('totalPoints');
+        progressBar = document.getElementById('progressBar');
+        congratsDiv = document.getElementById('congrats');
+        cityGrid = document.getElementById('cityGrid');
+        appTitleEl = document.getElementById('appTitle');
+        appSubtitleEl = document.getElementById('appSubtitle');
+        selectCityTitleEl = document.getElementById('selectCityTitle');
+        
+        initChat();
+        
+        // Определяем язык по стране пользователя
+        await detectLanguageByCountry();
+        
+        // Загружаем список городов
+        await loadCitiesList();
+        
+        // Настройка кнопок языков
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+            btn.addEventListener('click', () => setLanguage(btn.dataset.lang));
+            if (btn.dataset.lang === currentLang) btn.classList.add('active');
+        });
+        
+        // Проверяем сохранённый прогресс
+        const savedProgress = loadProgress();
+        if (savedProgress && savedProgress.currentCityId) {
+            const savedCity = citiesList.find(c => c.id === savedProgress.currentCityId);
+            if (savedCity) {
+                currentLang = savedProgress.currentLang || 'ru';
+                await loadCity(savedCity);
+                // Восстанавливаем прогресс
+                currentIndex = savedProgress.currentIndex;
+                scores = savedProgress.scores;
+                attempts = savedProgress.attempts;
+                completed = savedProgress.completed;
+                hintShown = savedProgress.hintShown;
+                totalScore = savedProgress.totalScore;
+                updateUI();
+                renderCurrentQuestion();
+                return;
+            }
+        }
+        
+        // Если нет сохранённого прогресса, показываем выбор города
+        stepsContainer.innerHTML = '<div class="loading">🏙️ Выберите город из списка выше</div>';
+    });
+</script>
+</body>
+</html>
