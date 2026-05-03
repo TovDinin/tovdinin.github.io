@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <meta name="theme-color" content="#1a1a2e">
-    <title>Квест «Тайны Тобольска»</title>
+    <title>Тайны вашего города</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -43,41 +43,48 @@
         .spinner { display: inline-block; width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: #b8860b; animation: spin 1s ease-in-out infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
         .lang-bar { display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 16px; }
-        .lang-btn { background: rgba(255,255,255,0.1); border: none; border-radius: 40px; padding: 6px 14px; cursor: pointer; color: #ddd; }
+        .lang-btn { background: rgba(255,255,255,0.1); border: none; border-radius: 40px; padding: 8px 16px; cursor: pointer; color: #ddd; font-size: 14px; font-weight: 500; transition: 0.2s; }
+        .lang-btn:hover { background: rgba(255,255,255,0.2); }
         .lang-btn.active { background: #b8860b; color: white; }
-        .ai-button { position: fixed; bottom: 20px; right: 20px; width: 56px; height: 56px; border-radius: 50%; background: #b8860b; color: white; font-size: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 1000; border: none; }
-        .chat-modal { position: fixed; bottom: 90px; right: 20px; width: 300px; background: #1e1e2e; border-radius: 20px; z-index: 1001; display: none; flex-direction: column; border: 1px solid rgba(255,255,255,0.1); }
-        .chat-header { background: #b8860b; padding: 12px; font-weight: bold; display: flex; justify-content: space-between; }
-        .chat-close { background: none; border: none; color: white; font-size: 18px; cursor: pointer; }
-        .chat-messages { height: 250px; overflow-y: auto; padding: 12px; background: #0f0f1a; }
-        .message { padding: 8px 12px; border-radius: 16px; margin-bottom: 8px; max-width: 85%; }
-        .user-message { background: #b8860b; color: white; align-self: flex-end; text-align: right; }
-        .bot-message { background: #2a2a3a; color: #eee; }
-        .chat-input-area { display: flex; padding: 12px; gap: 8px; }
-        .chat-input { flex: 1; padding: 8px; border-radius: 30px; border: none; background: #2a2a3a; color: white; }
-        .chat-send { width: auto; background: #b8860b; padding: 8px 16px; }
-        .intro-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: flex; align-items: center; justify-content: center; z-index: 2000; }
-        .intro-card { background: #1a1a2e; max-width: 500px; border-radius: 32px; padding: 28px; }
+        .ai-button { position: fixed; bottom: 20px; right: 20px; width: 56px; height: 56px; border-radius: 50%; background: #b8860b; color: white; font-size: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 1000; border: none; transition: transform 0.2s; }
+        .ai-button:hover { transform: scale(1.05); }
+        .chat-modal { position: fixed; bottom: 90px; right: 20px; width: 320px; background: #1e1e2e; border-radius: 20px; z-index: 1001; display: none; flex-direction: column; border: 1px solid rgba(255,255,255,0.1); overflow: hidden; }
+        .chat-header { background: #b8860b; padding: 12px 16px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+        .chat-close { background: none; border: none; color: white; font-size: 20px; cursor: pointer; width: auto; }
+        .chat-messages { height: 280px; overflow-y: auto; padding: 12px; background: #0f0f1a; display: flex; flex-direction: column; gap: 8px; }
+        .message { padding: 10px 14px; border-radius: 18px; max-width: 85%; font-size: 13px; }
+        .user-message { background: #b8860b; color: white; align-self: flex-end; }
+        .bot-message { background: #2a2a3a; color: #eee; align-self: flex-start; }
+        .chat-input-area { display: flex; padding: 12px; gap: 8px; background: #1e1e2e; border-top: 1px solid rgba(255,255,255,0.1); }
+        .chat-input { flex: 1; padding: 10px 14px; border-radius: 30px; border: none; background: #2a2a3a; color: white; font-size: 14px; }
+        .chat-send { width: auto; background: #b8860b; padding: 8px 18px; margin: 0; }
+        .intro-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 2000; }
+        .intro-card { background: #1a1a2e; max-width: 500px; border-radius: 32px; padding: 28px; border: 1px solid rgba(255,255,255,0.1); max-height: 85%; overflow-y: auto; }
+        .intro-card h2 { color: #ffd966; margin-bottom: 16px; }
+        .intro-card hr { margin: 16px 0; border-color: rgba(255,255,255,0.1); }
         .close-intro { margin-top: 20px; }
         .final-message { background: linear-gradient(135deg, #1a472a, #0d2616); border-radius: 32px; padding: 28px; text-align: center; }
         .trophy { font-size: 60px; margin: 16px 0; }
-        .toast { visibility: hidden; min-width: 200px; background: #333; color: #fff; text-align: center; border-radius: 40px; padding: 12px; position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 1000; opacity: 0; transition: opacity 0.3s; }
+        .toast { visibility: hidden; min-width: 200px; background: #333; color: #fff; text-align: center; border-radius: 40px; padding: 12px 20px; position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 1000; opacity: 0; transition: opacity 0.3s; font-size: 14px; }
         .toast.show { visibility: visible; opacity: 0.95; }
     </style>
 </head>
 <body>
 <div class="container">
     <div class="header">
-        <h1>🗝️ Тайны Тобольска</h1>
+        <h1 id="appTitle">🗺️ Тайны вашего города</h1>
+        <p id="appSubtitle">Пешеходные квесты по всему миру</p>
     </div>
     <div class="lang-bar">
         <button class="lang-btn" data-lang="ru">🇷🇺 Русский</button>
         <button class="lang-btn" data-lang="en">🇬🇧 English</button>
+        <button class="lang-btn" data-lang="it">🇮🇹 Italiano</button>
+        <button class="lang-btn" data-lang="nl">🇳🇱 Nederlands</button>
         <button class="lang-btn" data-lang="kk">🇰🇿 Қазақша</button>
     </div>
 
     <div id="citySelector" class="city-selector">
-        <h3>🌆 Выберите город</h3>
+        <h3 id="selectCityTitle">🌆 Выберите город</h3>
         <div id="cityGrid" class="city-grid"></div>
     </div>
 
@@ -94,28 +101,54 @@
 <button class="ai-button" id="aiButton">🤖</button>
 <div id="chatModal" class="chat-modal">
     <div class="chat-header"><span id="chatTitle">🤖 AI-помощник</span><button class="chat-close" id="chatClose">✕</button></div>
-    <div id="chatMessages" class="chat-messages"><div class="message bot-message">Здравствуйте! Я помогу с вопросами по квесту.</div></div>
+    <div id="chatMessages" class="chat-messages"><div class="message bot-message">Здравствуйте! Я помогу с вопросами по квесту. Спрашивайте о маршруте, загадках, баллах.</div></div>
     <div class="chat-input-area"><input type="text" id="chatInput" class="chat-input" placeholder="Напишите вопрос..."><button id="chatSend" class="chat-send">➤</button></div>
 </div>
 
 <div id="introOverlay" class="intro-overlay" style="display:none;"><div class="intro-card" id="introCard"></div></div>
 
 <script>
-    // Данные о городах
-    const citiesData = {
-        tobolsk: {
-            name: { ru: "Тобольск", en: "Tobolsk", kk: "Тобыл" },
-            description: { ru: "Древняя столица Сибири", en: "Ancient capital of Siberia", kk: "Сібірдің ежелгі астанасы" },
-            active: true,
-            routeDistance: 6.3,
-            estimatedTime: 1.9,
-            calories: 360,
-            totalPoints: 12,
-            maxScore: 36,
-            stepsUrl: "data/tobolsk.json"
+    // ==================== ПЕРЕВОДЫ ИНТЕРФЕЙСА ====================
+    const translations = {
+        ru: {
+            appTitle: "🗺️ Тайны вашего города",
+            appSubtitle: "Пешеходные квесты по всему миру",
+            selectCity: "🌆 Выберите город",
+            totalScore: "⭐ Баллы: ",
+            completed: "✅ Пройдено: "
+        },
+        en: {
+            appTitle: "🗺️ Secrets of Your City",
+            appSubtitle: "Walking quests around the world",
+            selectCity: "🌆 Choose a city",
+            totalScore: "⭐ Score: ",
+            completed: "✅ Completed: "
+        },
+        it: {
+            appTitle: "🗺️ Segreti della tua città",
+            appSubtitle: "Quest a piedi in tutto il mondo",
+            selectCity: "🌆 Scegli una città",
+            totalScore: "⭐ Punteggio: ",
+            completed: "✅ Completati: "
+        },
+        nl: {
+            appTitle: "🗺️ Geheimen van jouw stad",
+            appSubtitle: "Wandeltochten over de hele wereld",
+            selectCity: "🌆 Kies een stad",
+            totalScore: "⭐ Score: ",
+            completed: "✅ Voltooid: "
+        },
+        kk: {
+            appTitle: "🗺️ Қалаңыздың құпиялары",
+            appSubtitle: "Әлем бойынша жаяу квесттер",
+            selectCity: "🌆 Қаланы таңдаңыз",
+            totalScore: "⭐ Ұпай: ",
+            completed: "✅ Өткен: "
         }
     };
 
+    // ==================== ДАННЫЕ ГОРОДОВ ====================
+    let citiesList = [];
     let currentCity = null;
     let currentLang = 'ru';
     let currentSteps = [];
@@ -127,37 +160,74 @@
     let hintShown = [];
     let totalScore = 0;
 
+    // DOM элементы
     let stepsContainer, totalSpan, completedSpan, totalPointsSpan, progressBar, congratsDiv, cityGrid;
+    let appTitleEl, appSubtitleEl, selectCityTitleEl;
 
-    function showMessage(msg) {
+    // ==================== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ====================
+    function showMessage(msg, isError = false) {
         const toast = document.getElementById('toastMsg');
         toast.innerText = msg;
         toast.classList.add('show');
-        setTimeout(() => toast.classList.remove('show'), 2000);
+        setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+
+    function updateUILanguage() {
+        const t = translations[currentLang];
+        if (appTitleEl) appTitleEl.innerText = t.appTitle;
+        if (appSubtitleEl) appSubtitleEl.innerText = t.appSubtitle;
+        if (selectCityTitleEl) selectCityTitleEl.innerText = t.selectCity;
+    }
+
+    // ==================== ЗАГРУЗКА ГОРОДОВ ====================
+    async function loadCitiesList() {
+        try {
+            const response = await fetch('cities.json?t=' + Date.now()); // кэш-бастер
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const data = await response.json();
+            citiesList = data.cities.filter(c => c.active === true);
+            renderCitySelector();
+            return true;
+        } catch(e) {
+            console.error('Ошибка загрузки городов:', e);
+            cityGrid.innerHTML = `<div style="text-align:center; color:#ff9999;">❌ Ошибка загрузки списка городов.<br>Проверьте файл cities.json</div>`;
+            return false;
+        }
     }
 
     function renderCitySelector() {
         if (!cityGrid) return;
         cityGrid.innerHTML = '';
-        for (const [id, city] of Object.entries(citiesData)) {
-            if (!city.active) continue;
+        if (citiesList.length === 0) {
+            cityGrid.innerHTML = '<div style="text-align:center;">🏙️ Города временно недоступны</div>';
+            return;
+        }
+        for (const city of citiesList) {
             const card = document.createElement('div');
             card.className = 'city-card';
-            card.innerHTML = `<div style="font-size:32px;">🏙️</div><div><strong>${city.name.ru}</strong></div><div style="font-size:12px;">${city.routeDistance} км • ${city.totalPoints} точек</div>`;
-            card.onclick = () => loadCity(id, city);
+            const cityName = city.name[currentLang] || city.name.ru;
+            card.innerHTML = `
+                <div style="font-size: 40px;">🏙️</div>
+                <div><strong>${cityName}</strong></div>
+                <div style="font-size: 11px; margin-top: 6px;">${city.routeDistance} км • ${city.totalPoints} точек</div>
+                <div style="font-size: 10px; color: #ffd966;">${city.shortDescription[currentLang] || city.shortDescription.ru}</div>
+            `;
+            card.onclick = () => loadCity(city);
             cityGrid.appendChild(card);
         }
     }
 
-    async function loadCity(cityId, city) {
+    async function loadCity(city) {
         stepsContainer.innerHTML = '<div class="loading"><div class="spinner"></div><br>Загрузка города...</div>';
         try {
-            const response = await fetch(city.stepsUrl);
+            const url = `data/${city.id}.json?t=${Date.now()}`;
+            const response = await fetch(url);
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
             const data = await response.json();
-            currentCity = cityId;
-            currentSteps = data.steps.ru || [];
-            currentFacts = data.facts.ru || [];
+            
+            currentCity = city;
+            currentSteps = data.steps[currentLang] || data.steps.ru || [];
+            currentFacts = data.facts[currentLang] || data.facts.ru || [];
             
             const stepsCount = currentSteps.length;
             scores = new Array(stepsCount).fill(0);
@@ -168,26 +238,32 @@
             currentIndex = 0;
             
             // Показать приветствие
-            showIntro(city);
+            showCityIntro(city);
             
             updateUI();
             renderCurrentQuestion();
+            
+            // Скрыть селектор городов после выбора (по желанию)
+            // document.getElementById('citySelector').style.display = 'none';
         } catch(e) {
-            stepsContainer.innerHTML = `<div class="loading">❌ Ошибка: ${e.message}<br>Проверьте файл ${city.stepsUrl}</div>`;
+            stepsContainer.innerHTML = `<div class="loading">❌ Ошибка: ${e.message}<br>Проверьте файл data/${city.id}.json</div>`;
             console.error(e);
         }
     }
 
-    function showIntro(city) {
+    function showCityIntro(city) {
+        const t = translations[currentLang];
+        const cityName = city.name[currentLang] || city.name.ru;
+        const desc = city.shortDescription[currentLang] || city.shortDescription.ru;
         const introCard = document.getElementById('introCard');
         introCard.innerHTML = `
-            <h2>🏰 Добро пожаловать в квест по ${city.name.ru}!</h2>
-            <p>${city.description.ru}</p>
+            <h2>🏰 Добро пожаловать в ${cityName}!</h2>
+            <p>${desc}</p>
             <hr>
-            <p>📍 Протяжённость: ${city.routeDistance} км</p>
-            <p>⏱️ Время: ${city.estimatedTime} часа</p>
-            <p>🔥 ≈ ${city.calories} ккал (примерно как 1.5 бургера!)</p>
-            <p>⭐ Правила: 3 балла с 1 попытки, 2 со 2-й, 1 с 3-й. Максимум: ${city.maxScore} баллов.</p>
+            <p>📍 Протяжённость маршрута: ${city.routeDistance} км</p>
+            <p>⏱️ Время прохождения: ${city.estimatedTime} часа</p>
+            <p>🔥 ≈ ${city.calories} ккал (примерно как ${Math.round(city.calories/300)} бургеров!)</p>
+            <p>⭐ Правила: 3 балла с 1 попытки, 2 со 2-й, 1 с 3-й.<br>🎯 Максимум: ${city.maxScore} баллов.</p>
             <button id="closeIntro" class="close-intro">Начать квест →</button>
         `;
         document.getElementById('introOverlay').style.display = 'flex';
@@ -205,33 +281,64 @@
         const percent = (compCount / currentSteps.length) * 100;
         progressBar.style.width = percent + "%";
         if (compCount === currentSteps.length && currentSteps.length > 0) showFinalScreen();
+        saveProgress();
+    }
+
+    function saveProgress() {
+        if (!currentCity) return;
+        const progress = {
+            currentIndex, scores, attempts, completed, hintShown, totalScore,
+            currentCityId: currentCity.id, currentLang
+        };
+        localStorage.setItem('quest_progress', JSON.stringify(progress));
+    }
+
+    function loadProgress() {
+        const saved = localStorage.getItem('quest_progress');
+        if (!saved) return false;
+        try {
+            const p = JSON.parse(saved);
+            if (p.currentCityId && citiesList.find(c => c.id === p.currentCityId)) {
+                currentLang = p.currentLang || 'ru';
+                return p;
+            }
+        } catch(e) {}
+        return false;
     }
 
     function showFinalScreen() {
         const maxScore = currentSteps.length * 3;
+        const t = translations[currentLang];
         congratsDiv.innerHTML = `
             <div class="trophy">${totalScore === maxScore ? '🏆✨ ЗОЛОТОЙ КУБОК ✨🏆' : '⭐🏅⭐'}</div>
-            <strong>${totalScore === maxScore ? '🎉 ПОЗДРАВЛЯЕМ! 🎉' : 'Квест пройден!'}</strong>
+            <strong>${totalScore === maxScore ? '🎉 ПОЗДРАВЛЯЕМ! ВЫ СУПЕР ЭРУДИТ! 🎉' : 'Квест пройден!'}</strong>
             <br>Вы набрали ${totalScore}/${maxScore} баллов.
             <br><br>
-            <button id="resetBtn">🔄 Пройти заново</button>
+            <button id="resetCityBtn" style="background:#2c6e2c;">🔄 Пройти заново</button>
+            <button id="backToCitiesBtn" style="margin-top:10px;">🏙️ Другие города</button>
         `;
         congratsDiv.style.display = 'block';
-        document.getElementById('resetBtn')?.addEventListener('click', () => {
+        document.getElementById('resetCityBtn')?.addEventListener('click', () => {
             scores.fill(0);
             attempts.fill(0);
             completed.fill(false);
-            hintShown.fill(false);
+            hintShown.fill(0);
             totalScore = 0;
             currentIndex = 0;
             renderCurrentQuestion();
             updateUI();
             congratsDiv.style.display = 'none';
         });
+        document.getElementById('backToCitiesBtn')?.addEventListener('click', () => {
+            congratsDiv.style.display = 'none';
+            stepsContainer.innerHTML = '<div class="loading">🏙️ Выберите город из списка выше</div>';
+            currentCity = null;
+            document.getElementById('citySelector').style.display = 'block';
+        });
     }
 
     function renderCurrentQuestion() {
-        if (!currentSteps.length) return;
+        if (!currentSteps.length || !currentSteps[currentIndex]) return;
         stepsContainer.innerHTML = '';
         const step = currentSteps[currentIndex];
         const isCompleted = completed[currentIndex];
@@ -299,7 +406,7 @@
         attempts[currentIndex] = curAttempt;
         
         if (hintShown[currentIndex]) {
-            showMessage('Этот вопрос уже закрыт');
+            showMessage('Этот вопрос уже закрыт с 0 баллов');
             return;
         }
         
@@ -331,7 +438,7 @@
             if (curAttempt >= 3) {
                 hintShown[currentIndex] = true;
                 const hintDiv = document.getElementById('hintMsg');
-                hintDiv.innerHTML = `💡 Подсказка: ${step.correct[0]}. Вы получаете 0 баллов.`;
+                hintDiv.innerHTML = `💡 Подсказка: ${step.correct[0]}. Вы получаете 0 баллов за этот вопрос.`;
                 hintDiv.style.display = 'block';
                 
                 scores[currentIndex] = 0;
@@ -339,7 +446,7 @@
                 
                 const factDiv = document.getElementById('factMsg');
                 const factText = currentFacts[currentIndex] || '';
-                factDiv.innerHTML = `<strong>📜 Историческая справка:</strong><br>${factText}<br>⚠️ 0 баллов`;
+                factDiv.innerHTML = `<strong>📜 Историческая справка:</strong><br>${factText}<br>⚠️ Использована подсказка — 0 баллов`;
                 factDiv.style.display = 'block';
                 
                 const checkBtn = document.getElementById('checkBtn');
@@ -356,17 +463,66 @@
                 input.focus();
             }
         }
+        saveProgress();
+    }
+
+    // ==================== ОПРЕДЕЛЕНИЕ ЯЗЫКА ПО СТРАНЕ ====================
+    function detectLanguageByCountry() {
+        // Метод 1: Определение по IP через бесплатный API
+        fetch('https://ipapi.co/json/')
+            .then(response => response.json())
+            .then(data => {
+                const country = data.country_code;
+                const langMap = {
+                    'RU': 'ru', 'BY': 'ru', 'KZ': 'ru', 'UA': 'ru',
+                    'US': 'en', 'GB': 'en', 'AU': 'en', 'CA': 'en',
+                    'IT': 'it', 'SM': 'it', 'VA': 'it',
+                    'NL': 'nl', 'BE': 'nl',
+                    'KZ': 'kk'
+                };
+                const detectedLang = langMap[country] || 'en';
+                if (detectedLang !== currentLang) {
+                    currentLang = detectedLang;
+                    updateUILanguage();
+                    renderCitySelector();
+                    updateUILanguageElements();
+                }
+            })
+            .catch(() => {
+                // Если API не ответил, используем язык браузера
+                const browserLang = navigator.language.split('-')[0];
+                const supportedLangs = ['ru', 'en', 'it', 'nl', 'kk'];
+                if (supportedLangs.includes(browserLang)) {
+                    currentLang = browserLang;
+                    updateUILanguage();
+                    renderCitySelector();
+                    updateUILanguageElements();
+                }
+            });
+    }
+
+    function updateUILanguageElements() {
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.dataset.lang === currentLang) btn.classList.add('active');
+        });
+        const t = translations[currentLang];
+        document.getElementById('chatTitle').innerText = t.appTitle.split(' ')[0] + ' 🤖 помощник';
     }
 
     function setLanguage(lang) {
         currentLang = lang;
-        document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
-        document.querySelector(`.lang-btn[data-lang="${lang}"]`).classList.add('active');
-        if (currentCity && citiesData[currentCity]) {
-            // Обновить заголовки при необходимости
+        updateUILanguage();
+        renderCitySelector();
+        updateUILanguageElements();
+        if (currentCity && currentCity.id) {
+            // Перезагрузить город с новым языком
+            loadCity(currentCity);
         }
+        saveProgress();
     }
 
+    // ==================== ЧАТ ====================
     function initChat() {
         const aiButton = document.getElementById('aiButton');
         const chatModal = document.getElementById('chatModal');
@@ -388,10 +544,20 @@
         
         function getBotAnswer(question) {
             const q = question.toLowerCase();
-            if (q.includes('балл') || q.includes('правил')) return 'Баллы: 3 (1 попытка), 2 (2), 1 (3). После 3 ошибок — подсказка и 0 баллов.';
-            if (q.includes('где') || q.includes('искать')) return 'Каждая точка — реальный объект в городе. Ищите таблички, памятники, информационные стенды.';
-            if (q.includes('маршрут') && currentCity && citiesData[currentCity]) return `Маршрут ${citiesData[currentCity].routeDistance} км, время ~${citiesData[currentCity].estimatedTime} часа.`;
-            return 'Я AI-помощник квеста. Внимательно читайте загадки, ищите подсказки на месте. Удачи!';
+            if (q.includes('балл') || q.includes('правил') || q.includes('score') || q.includes('point')) {
+                return 'Баллы начисляются: 3 за ответ с 1 попытки, 2 со 2-й, 1 с 3-й. После 3 ошибок — подсказка и 0 баллов. Максимум можно набрать 30-45 баллов в зависимости от города.';
+            }
+            if (q.includes('где') || q.includes('искать') || q.includes('find') || q.includes('where')) {
+                return 'Каждая точка квеста — реальный объект в городе. Внимательно читайте загадку и ищите подсказки на табличках, памятниках, информационных стендах или фасадах зданий.';
+            }
+            if (q.includes('маршрут') || q.includes('длина') || q.includes('route') || q.includes('distance')) {
+                if (currentCity) return `Маршрут по ${currentCity.name.ru} имеет длину ${currentCity.routeDistance} км и занимает около ${currentCity.estimatedTime} часа.`;
+                return 'Выберите сначала город, чтобы узнать длину маршрута.';
+            }
+            if (q.includes('помощь') || q.includes('help')) {
+                return 'Я AI-помощник квеста. Могу подсказать правила, объяснить как искать ответы, рассказать о маршруте. Просто задайте вопрос!';
+            }
+            return 'Внимательно читайте загадку и ищите подсказки на самом объекте (таблички, даты, фамилии, гербы). Если совсем сложно, попробуйте поискать информацию на информационных стендах. Удачи!';
         }
         
         chatSend.onclick = () => {
@@ -399,31 +565,14 @@
             if (!text) return;
             addMessage(text, true);
             const reply = getBotAnswer(text);
-            setTimeout(() => addMessage(reply, false), 300);
+            setTimeout(() => addMessage(reply, false), 400);
             chatInput.value = '';
         };
         chatInput.onkeypress = (e) => { if (e.key === 'Enter') chatSend.click(); };
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
+    // ==================== ИНИЦИАЛИЗАЦИЯ ====================
+    document.addEventListener('DOMContentLoaded', async () => {
         stepsContainer = document.getElementById('stepsContainer');
         totalSpan = document.getElementById('totalScore');
-        completedSpan = document.getElementById('completedCount');
-        totalPointsSpan = document.getElementById('totalPoints');
-        progressBar = document.getElementById('progressBar');
-        congratsDiv = document.getElementById('congrats');
-        cityGrid = document.getElementById('cityGrid');
-        
-        initChat();
-        renderCitySelector();
-        
-        document.querySelectorAll('.lang-btn').forEach(btn => {
-            btn.addEventListener('click', () => setLanguage(btn.dataset.lang));
-            if (btn.dataset.lang === 'ru') btn.classList.add('active');
-        });
-        
-        stepsContainer.innerHTML = '<div class="loading">🏙️ Выберите город из списка выше</div>';
-    });
-</script>
-</body>
-</html>
+        completedSpan
