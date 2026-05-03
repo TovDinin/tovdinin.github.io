@@ -23,7 +23,6 @@
         .city-card { background: rgba(0,0,0,0.3); border-radius: 20px; padding: 16px; text-align: center; cursor: pointer; transition: 0.2s; }
         .city-card:hover { background: #b8860b; transform: translateY(-2px); }
         .city-card.disabled { opacity: 0.5; cursor: not-allowed; }
-        .city-card.disabled:hover { background: rgba(0,0,0,0.3); transform: none; }
         .score-panel { background: rgba(255,255,255,0.08); border-radius: 32px; padding: 16px 20px; display: flex; justify-content: space-between; margin-bottom: 20px; }
         .score-item { background: rgba(0,0,0,0.3); padding: 8px 18px; border-radius: 40px; }
         .progress { background: rgba(255,255,255,0.15); border-radius: 40px; height: 8px; margin: 15px 0; overflow: hidden; }
@@ -37,12 +36,13 @@
         input { width: 100%; padding: 14px 18px; border: 1px solid rgba(255,255,255,0.2); border-radius: 60px; margin: 12px 0; background: rgba(0,0,0,0.4); color: white; }
         input:focus { outline: none; border-color: #b8860b; }
         button { background: linear-gradient(135deg, #b8860b, #8b6508); color: white; border: none; padding: 14px 20px; border-radius: 60px; font-size: 16px; font-weight: 600; cursor: pointer; width: 100%; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
         .fact { background: rgba(46,125,50,0.3); padding: 16px; border-radius: 24px; margin-top: 16px; display: none; }
         .hint { background: rgba(255,152,0,0.2); padding: 12px; border-radius: 20px; margin-top: 12px; color: #ffb74d; display: none; }
         .loading { text-align: center; padding: 40px; color: #aaa; }
         .spinner { display: inline-block; width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: #b8860b; animation: spin 1s ease-in-out infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .lang-bar { display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 16px; }
+        .lang-bar { display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
         .lang-btn { background: rgba(255,255,255,0.1); border: none; border-radius: 40px; padding: 8px 16px; cursor: pointer; color: #ddd; font-size: 14px; font-weight: 500; transition: 0.2s; }
         .lang-btn:hover { background: rgba(255,255,255,0.2); }
         .lang-btn.active { background: #b8860b; color: white; }
@@ -147,8 +147,46 @@
         }
     };
 
-    // ==================== ДАННЫЕ ГОРОДОВ ====================
-    let citiesList = [];
+    // ==================== ДАННЫЕ ГОРОДОВ (ВСТРОЕННЫЕ) ====================
+    const citiesData = {
+        tobolsk: {
+            id: "tobolsk",
+            name: { ru: "Тобольск", en: "Tobolsk", it: "Tobolsk", nl: "Tobolsk", kk: "Тобыл" },
+            shortDescription: { ru: "Древняя столица Сибири", en: "Ancient capital of Siberia", it: "Antica capitale della Siberia", nl: "Oude hoofdstad van Siberië", kk: "Сібірдің ежелгі астанасы" },
+            active: true,
+            routeDistance: 6.3,
+            estimatedTime: 1.9,
+            calories: 360,
+            totalPoints: 12,
+            maxScore: 36,
+            fileName: "tobolsk.json"
+        },
+        rotterdam: {
+            id: "rotterdam",
+            name: { ru: "Роттердам", en: "Rotterdam", it: "Rotterdam", nl: "Rotterdam", kk: "Роттердам" },
+            shortDescription: { ru: "Город современной архитектуры", en: "City of modern architecture", it: "Città dell'architettura moderna", nl: "Stad van moderne architectuur", kk: "Қазіргі заманғы сәулет қаласы" },
+            active: true,
+            routeDistance: 5.5,
+            estimatedTime: 2.0,
+            calories: 310,
+            totalPoints: 10,
+            maxScore: 30,
+            fileName: "rotterdam.json"
+        },
+        venice: {
+            id: "venice",
+            name: { ru: "Венеция", en: "Venice", it: "Venezia", nl: "Venetië", kk: "Венеция" },
+            shortDescription: { ru: "Город на воде", en: "City on water", it: "Città sull'acqua", nl: "Stad op het water", kk: "Су қаласы" },
+            active: true,
+            routeDistance: 6.5,
+            estimatedTime: 3.0,
+            calories: 370,
+            totalPoints: 11,
+            maxScore: 33,
+            fileName: "venice.json"
+        }
+    };
+
     let currentCity = null;
     let currentLang = 'ru';
     let currentSteps = [];
@@ -164,8 +202,7 @@
     let stepsContainer, totalSpan, completedSpan, totalPointsSpan, progressBar, congratsDiv, cityGrid;
     let appTitleEl, appSubtitleEl, selectCityTitleEl;
 
-    // ==================== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ====================
-    function showMessage(msg, isError = false) {
+    function showMessage(msg) {
         const toast = document.getElementById('toastMsg');
         toast.innerText = msg;
         toast.classList.add('show');
@@ -179,38 +216,20 @@
         if (selectCityTitleEl) selectCityTitleEl.innerText = t.selectCity;
     }
 
-    // ==================== ЗАГРУЗКА ГОРОДОВ ====================
-    async function loadCitiesList() {
-        try {
-            const response = await fetch('cities.json?t=' + Date.now()); // кэш-бастер
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            const data = await response.json();
-            citiesList = data.cities.filter(c => c.active === true);
-            renderCitySelector();
-            return true;
-        } catch(e) {
-            console.error('Ошибка загрузки городов:', e);
-            cityGrid.innerHTML = `<div style="text-align:center; color:#ff9999;">❌ Ошибка загрузки списка городов.<br>Проверьте файл cities.json</div>`;
-            return false;
-        }
-    }
-
     function renderCitySelector() {
         if (!cityGrid) return;
         cityGrid.innerHTML = '';
-        if (citiesList.length === 0) {
-            cityGrid.innerHTML = '<div style="text-align:center;">🏙️ Города временно недоступны</div>';
-            return;
-        }
-        for (const city of citiesList) {
+        for (const [id, city] of Object.entries(citiesData)) {
+            if (!city.active) continue;
             const card = document.createElement('div');
             card.className = 'city-card';
             const cityName = city.name[currentLang] || city.name.ru;
+            const cityDesc = city.shortDescription[currentLang] || city.shortDescription.ru;
             card.innerHTML = `
                 <div style="font-size: 40px;">🏙️</div>
                 <div><strong>${cityName}</strong></div>
                 <div style="font-size: 11px; margin-top: 6px;">${city.routeDistance} км • ${city.totalPoints} точек</div>
-                <div style="font-size: 10px; color: #ffd966;">${city.shortDescription[currentLang] || city.shortDescription.ru}</div>
+                <div style="font-size: 10px; color: #ffd966;">${cityDesc}</div>
             `;
             card.onclick = () => loadCity(city);
             cityGrid.appendChild(card);
@@ -220,14 +239,16 @@
     async function loadCity(city) {
         stepsContainer.innerHTML = '<div class="loading"><div class="spinner"></div><br>Загрузка города...</div>';
         try {
-            const url = `data/${city.id}.json?t=${Date.now()}`;
+            const url = `data/${city.fileName}?t=${Date.now()}`;
             const response = await fetch(url);
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            if (!response.ok) throw new Error(`HTTP ${response.status} — файл ${city.fileName} не найден`);
             const data = await response.json();
             
             currentCity = city;
             currentSteps = data.steps[currentLang] || data.steps.ru || [];
             currentFacts = data.facts[currentLang] || data.facts.ru || [];
+            
+            if (currentSteps.length === 0) throw new Error('Нет данных для этого языка');
             
             const stepsCount = currentSteps.length;
             scores = new Array(stepsCount).fill(0);
@@ -237,22 +258,16 @@
             totalScore = 0;
             currentIndex = 0;
             
-            // Показать приветствие
             showCityIntro(city);
-            
             updateUI();
             renderCurrentQuestion();
-            
-            // Скрыть селектор городов после выбора (по желанию)
-            // document.getElementById('citySelector').style.display = 'none';
         } catch(e) {
-            stepsContainer.innerHTML = `<div class="loading">❌ Ошибка: ${e.message}<br>Проверьте файл data/${city.id}.json</div>`;
             console.error(e);
+            stepsContainer.innerHTML = `<div class="loading">❌ Ошибка: ${e.message}<br>Проверьте файл data/${city.fileName}</div>`;
         }
     }
 
     function showCityIntro(city) {
-        const t = translations[currentLang];
         const cityName = city.name[currentLang] || city.name.ru;
         const desc = city.shortDescription[currentLang] || city.shortDescription.ru;
         const introCard = document.getElementById('introCard');
@@ -298,7 +313,7 @@
         if (!saved) return false;
         try {
             const p = JSON.parse(saved);
-            if (p.currentCityId && citiesList.find(c => c.id === p.currentCityId)) {
+            if (p.currentCityId && citiesData[p.currentCityId]) {
                 currentLang = p.currentLang || 'ru';
                 return p;
             }
@@ -308,7 +323,6 @@
 
     function showFinalScreen() {
         const maxScore = currentSteps.length * 3;
-        const t = translations[currentLang];
         congratsDiv.innerHTML = `
             <div class="trophy">${totalScore === maxScore ? '🏆✨ ЗОЛОТОЙ КУБОК ✨🏆' : '⭐🏅⭐'}</div>
             <strong>${totalScore === maxScore ? '🎉 ПОЗДРАВЛЯЕМ! ВЫ СУПЕР ЭРУДИТ! 🎉' : 'Квест пройден!'}</strong>
@@ -466,63 +480,20 @@
         saveProgress();
     }
 
-    // ==================== ОПРЕДЕЛЕНИЕ ЯЗЫКА ПО СТРАНЕ ====================
-    function detectLanguageByCountry() {
-        // Метод 1: Определение по IP через бесплатный API
-        fetch('https://ipapi.co/json/')
-            .then(response => response.json())
-            .then(data => {
-                const country = data.country_code;
-                const langMap = {
-                    'RU': 'ru', 'BY': 'ru', 'KZ': 'ru', 'UA': 'ru',
-                    'US': 'en', 'GB': 'en', 'AU': 'en', 'CA': 'en',
-                    'IT': 'it', 'SM': 'it', 'VA': 'it',
-                    'NL': 'nl', 'BE': 'nl',
-                    'KZ': 'kk'
-                };
-                const detectedLang = langMap[country] || 'en';
-                if (detectedLang !== currentLang) {
-                    currentLang = detectedLang;
-                    updateUILanguage();
-                    renderCitySelector();
-                    updateUILanguageElements();
-                }
-            })
-            .catch(() => {
-                // Если API не ответил, используем язык браузера
-                const browserLang = navigator.language.split('-')[0];
-                const supportedLangs = ['ru', 'en', 'it', 'nl', 'kk'];
-                if (supportedLangs.includes(browserLang)) {
-                    currentLang = browserLang;
-                    updateUILanguage();
-                    renderCitySelector();
-                    updateUILanguageElements();
-                }
-            });
-    }
-
-    function updateUILanguageElements() {
-        document.querySelectorAll('.lang-btn').forEach(btn => {
-            btn.classList.remove('active');
-            if (btn.dataset.lang === currentLang) btn.classList.add('active');
-        });
-        const t = translations[currentLang];
-        document.getElementById('chatTitle').innerText = t.appTitle.split(' ')[0] + ' 🤖 помощник';
-    }
-
     function setLanguage(lang) {
         currentLang = lang;
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.dataset.lang === lang) btn.classList.add('active');
+        });
         updateUILanguage();
         renderCitySelector();
-        updateUILanguageElements();
         if (currentCity && currentCity.id) {
-            // Перезагрузить город с новым языком
-            loadCity(currentCity);
+            loadCity(citiesData[currentCity.id]);
         }
         saveProgress();
     }
 
-    // ==================== ЧАТ ====================
     function initChat() {
         const aiButton = document.getElementById('aiButton');
         const chatModal = document.getElementById('chatModal');
@@ -544,20 +515,16 @@
         
         function getBotAnswer(question) {
             const q = question.toLowerCase();
-            if (q.includes('балл') || q.includes('правил') || q.includes('score') || q.includes('point')) {
-                return 'Баллы начисляются: 3 за ответ с 1 попытки, 2 со 2-й, 1 с 3-й. После 3 ошибок — подсказка и 0 баллов. Максимум можно набрать 30-45 баллов в зависимости от города.';
+            if (q.includes('балл') || q.includes('правил') || q.includes('score')) {
+                return 'Баллы: 3 (1 попытка), 2 (2), 1 (3). После 3 ошибок — подсказка и 0 баллов. Максимум 30-45 баллов.';
             }
-            if (q.includes('где') || q.includes('искать') || q.includes('find') || q.includes('where')) {
-                return 'Каждая точка квеста — реальный объект в городе. Внимательно читайте загадку и ищите подсказки на табличках, памятниках, информационных стендах или фасадах зданий.';
+            if (q.includes('где') || q.includes('искать')) {
+                return 'Каждая точка — реальный объект. Ищите таблички, памятники, информационные стенды.';
             }
-            if (q.includes('маршрут') || q.includes('длина') || q.includes('route') || q.includes('distance')) {
-                if (currentCity) return `Маршрут по ${currentCity.name.ru} имеет длину ${currentCity.routeDistance} км и занимает около ${currentCity.estimatedTime} часа.`;
-                return 'Выберите сначала город, чтобы узнать длину маршрута.';
+            if (q.includes('маршрут') && currentCity) {
+                return `Маршрут ${currentCity.routeDistance} км, время ~${currentCity.estimatedTime} часа.`;
             }
-            if (q.includes('помощь') || q.includes('help')) {
-                return 'Я AI-помощник квеста. Могу подсказать правила, объяснить как искать ответы, рассказать о маршруте. Просто задайте вопрос!';
-            }
-            return 'Внимательно читайте загадку и ищите подсказки на самом объекте (таблички, даты, фамилии, гербы). Если совсем сложно, попробуйте поискать информацию на информационных стендах. Удачи!';
+            return 'Я AI-помощник квеста. Внимательно читайте загадки, ищите подсказки на месте. Удачи!';
         }
         
         chatSend.onclick = () => {
@@ -572,7 +539,7 @@
     }
 
     // ==================== ИНИЦИАЛИЗАЦИЯ ====================
-    document.addEventListener('DOMContentLoaded', async () => {
+    document.addEventListener('DOMContentLoaded', () => {
         stepsContainer = document.getElementById('stepsContainer');
         totalSpan = document.getElementById('totalScore');
         completedSpan = document.getElementById('completedCount');
@@ -585,27 +552,20 @@
         selectCityTitleEl = document.getElementById('selectCityTitle');
         
         initChat();
+        renderCitySelector();
         
-        // Определяем язык по стране пользователя
-        await detectLanguageByCountry();
-        
-        // Загружаем список городов
-        await loadCitiesList();
-        
-        // Настройка кнопок языков
         document.querySelectorAll('.lang-btn').forEach(btn => {
             btn.addEventListener('click', () => setLanguage(btn.dataset.lang));
-            if (btn.dataset.lang === currentLang) btn.classList.add('active');
+            if (btn.dataset.lang === 'ru') btn.classList.add('active');
         });
         
-        // Проверяем сохранённый прогресс
+        updateUILanguage();
+        
         const savedProgress = loadProgress();
-        if (savedProgress && savedProgress.currentCityId) {
-            const savedCity = citiesList.find(c => c.id === savedProgress.currentCityId);
-            if (savedCity) {
-                currentLang = savedProgress.currentLang || 'ru';
-                await loadCity(savedCity);
-                // Восстанавливаем прогресс
+        if (savedProgress && savedProgress.currentCityId && citiesData[savedProgress.currentCityId]) {
+            currentLang = savedProgress.currentLang || 'ru';
+            setLanguage(currentLang);
+            loadCity(citiesData[savedProgress.currentCityId]).then(() => {
                 currentIndex = savedProgress.currentIndex;
                 scores = savedProgress.scores;
                 attempts = savedProgress.attempts;
@@ -614,12 +574,10 @@
                 totalScore = savedProgress.totalScore;
                 updateUI();
                 renderCurrentQuestion();
-                return;
-            }
+            });
+        } else {
+            stepsContainer.innerHTML = '<div class="loading">🏙️ Выберите город из списка выше</div>';
         }
-        
-        // Если нет сохранённого прогресса, показываем выбор города
-        stepsContainer.innerHTML = '<div class="loading">🏙️ Выберите город из списка выше</div>';
     });
 </script>
 </body>
