@@ -3,13 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>Квест «Тайны Тобольска»</title>
+    <meta name="theme-color" content="#1a1a2e">
+    <title>Тайны вашего города — квесты по всему миру</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 100%); color: #f0f0f0; padding: 20px; padding-bottom: 90px; min-height: 100vh; }
+        body {
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 100%);
+            color: #f0f0f0;
+            padding: 20px;
+            padding-bottom: 90px;
+            min-height: 100vh;
+        }
         .container { max-width: 650px; margin: 0 auto; }
         .header { text-align: center; margin-bottom: 24px; }
         .header h1 { font-size: 1.8rem; background: linear-gradient(135deg, #ffd966, #b8860b); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .header p { font-size: 0.85rem; opacity: 0.7; }
         .city-selector { background: rgba(255,255,255,0.05); border-radius: 32px; padding: 20px; margin-bottom: 24px; }
         .city-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
         .city-card { background: rgba(0,0,0,0.3); border-radius: 20px; padding: 16px; text-align: center; cursor: pointer; transition: 0.2s; }
@@ -37,16 +46,65 @@
         .lang-btn { background: rgba(255,255,255,0.1); border: none; border-radius: 40px; padding: 8px 16px; cursor: pointer; color: #ddd; font-size: 14px; font-weight: 500; transition: 0.2s; }
         .lang-btn:hover { background: rgba(255,255,255,0.2); }
         .lang-btn.active { background: #b8860b; color: white; }
-        .bottom-buttons { position: fixed; bottom: 20px; right: 20px; display: flex; gap: 12px; z-index: 1000; }
-        .round-btn { width: 56px; height: 56px; border-radius: 50%; background: #b8860b; color: white; font-size: 26px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: none; transition: transform 0.2s; }
+        .bottom-buttons {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            gap: 12px;
+            z-index: 1000;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+        .round-btn {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: #b8860b;
+            color: white;
+            font-size: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            border: none;
+            transition: transform 0.2s;
+        }
         .round-btn:hover { transform: scale(1.05); }
-        .feedback-btn { background: #2c6e2c; }
-        .chat-modal, .feedback-modal { position: fixed; bottom: 90px; right: 20px; width: 320px; background: #1e1e2e; border-radius: 20px; z-index: 1001; display: none; flex-direction: column; border: 1px solid rgba(255,255,255,0.1); overflow: hidden; }
+        .donate-btn { background: #2c6e2c; font-size: 24px; }
+        .feedback-btn { background: #2c6e2c; font-size: 24px; }
+        .chat-modal, .feedback-modal, .donate-modal {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 320px;
+            background: #1e1e2e;
+            border-radius: 20px;
+            z-index: 1001;
+            display: none;
+            flex-direction: column;
+            border: 1px solid rgba(255,255,255,0.1);
+            overflow: hidden;
+        }
         .modal-header { background: #b8860b; padding: 12px 16px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
         .modal-close { background: none; border: none; color: white; font-size: 20px; cursor: pointer; width: auto; }
         .modal-content { padding: 16px; }
-        .feedback-option { display: flex; align-items: center; gap: 12px; padding: 12px; background: rgba(255,255,255,0.08); border-radius: 16px; margin-bottom: 12px; cursor: pointer; transition: 0.2s; }
-        .feedback-option:hover { background: rgba(184,134,11,0.3); }
+        .donate-option, .feedback-option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 16px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .donate-option:hover, .feedback-option:hover { background: rgba(184,134,11,0.3); }
+        .donate-icon, .feedback-icon { font-size: 28px; }
+        .donate-text, .feedback-text { flex: 1; }
+        .donate-text small, .feedback-text small { font-size: 11px; color: #aaa; display: block; }
         .chat-messages { height: 280px; overflow-y: auto; padding: 12px; background: #0f0f1a; display: flex; flex-direction: column; gap: 8px; }
         .message { padding: 10px 14px; border-radius: 18px; max-width: 85%; font-size: 13px; }
         .user-message { background: #b8860b; color: white; align-self: flex-end; }
@@ -63,6 +121,7 @@
         .trophy { font-size: 60px; margin: 16px 0; }
         .toast { visibility: hidden; min-width: 200px; background: #333; color: #fff; text-align: center; border-radius: 40px; padding: 12px 20px; position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 1000; opacity: 0; transition: opacity 0.3s; font-size: 14px; }
         .toast.show { visibility: visible; opacity: 0.95; }
+        .coffee-icon { font-size: 20px; margin-right: 6px; }
     </style>
 </head>
 <body>
@@ -95,16 +154,19 @@
 </div>
 
 <div class="bottom-buttons">
+    <button class="round-btn donate-btn" id="donateButton">☕</button>
     <button class="round-btn feedback-btn" id="feedbackButton">💬</button>
     <button class="round-btn" id="aiButton">🤖</button>
 </div>
 
+<!-- AI-чат -->
 <div id="chatModal" class="chat-modal">
     <div class="modal-header"><span>🤖 AI-помощник</span><button class="modal-close" id="chatClose">✕</button></div>
     <div id="chatMessages" class="chat-messages"><div class="message bot-message">Здравствуйте! Я помогу с вопросами по квесту. Спрашивайте о маршруте, загадках, баллах.</div></div>
     <div class="chat-input-area"><input type="text" id="chatInput" class="chat-input" placeholder="Напишите вопрос..."><button id="chatSend" class="chat-send">➤</button></div>
 </div>
 
+<!-- Обратная связь -->
 <div id="feedbackModal" class="feedback-modal">
     <div class="modal-header"><span>💬 Обратная связь</span><button class="modal-close" id="feedbackClose">✕</button></div>
     <div class="modal-content">
@@ -117,7 +179,7 @@
         </div>
         <div class="feedback-option" id="feedbackEmailCopy">
             <div class="feedback-icon">📧</div>
-            <div class="feedback-text"><strong>Скопировать email</strong><small>quest@example.com</small></div>
+            <div class="feedback-text"><strong>Скопировать email</strong><small>quest@tobolsk-quest.com</small></div>
         </div>
         <div class="feedback-option" id="feedbackTextCopy">
             <div class="feedback-icon">✏️</div>
@@ -126,15 +188,57 @@
     </div>
 </div>
 
+<!-- ДОНАТЫ -->
+<div id="donateModal" class="donate-modal">
+    <div class="modal-header"><span>☕ Поддержать проект</span><button class="modal-close" id="donateClose">✕</button></div>
+    <div class="modal-content">
+        <p style="margin-bottom: 16px;">❤️ <strong>Спасибо, что вы с нами!</strong></p>
+        <p style="margin-bottom: 16px; font-size: 14px; color: #ccc;">Если вам нравится квест, вы можете поддержать авторов — это поможет сделать новые маршруты и улучшить приложение. Любая сумма важна!</p>
+        <hr style="margin: 16px 0; border-color: rgba(255,255,255,0.1);">
+        
+        <div class="donate-option" id="donateBoosty">
+            <div class="donate-icon">🇷🇺</div>
+            <div class="donate-text">
+                <strong>Boosty</strong>
+                <small>Быстрый донат для России (карты, СБП)</small>
+            </div>
+            <div>➤</div>
+        </div>
+        
+        <div class="donate-option" id="donateBuymeacoffee">
+            <div class="donate-icon">☕</div>
+            <div class="donate-text">
+                <strong>Buy Me a Coffee</strong>
+                <small>Международная платформа (PayPal, Stripe)</small>
+            </div>
+            <div>➤</div>
+        </div>
+        
+        <div class="donate-option" id="donateTelegram">
+            <div class="donate-icon">📱</div>
+            <div class="donate-text">
+                <strong>Telegram Stars</strong>
+                <small>Отправить звёзды через Telegram</small>
+            </div>
+            <div>➤</div>
+        </div>
+        
+        <hr style="margin: 16px 0; border-color: rgba(255,255,255,0.1);">
+        <p style="font-size: 11px; color: #aaa; text-align: center;">Спасибо, что делаете квест лучше! 🙌</p>
+    </div>
+</div>
+
 <div id="introOverlay" class="intro-overlay" style="display:none;"><div class="intro-card" id="introCard"></div></div>
 
 <script>
-    // КОНФИГУРАЦИЯ - ВАШИ НОВЫЕ БОТЫ
-    const TELEGRAM_BOT_USERNAME = 'Quest_supportbot'; 
-    const TELEGRAM_BOT_URL = `https://t.me/${TELEGRAM_BOT_USERNAME}`;
+    // ==================== НАСТРОЙКИ ДОНАТОВ (ЗАМЕНИТЕ НА СВОИ ССЫЛКИ) ====================
+    const DONATE_URLS = {
+        boosty: 'https://boosty.to/ваш_логин',           // Замените на ссылку вашего Boosty
+        buymeacoffee: 'https://buymeacoffee.com/ваш_логин', // Замените на ссылку Buy Me a Coffee
+        telegram: 'https://t.me/Quest_supportbot?start=donate' // Ваш бот с командой /donate
+    };
     
-    // ==================== ПЕРЕВОДЫ И ОСТАЛЬНАЯ ЛОГИКА КВЕСТА ====================
-    // (Здесь остаётся весь ваш рабочий код квеста из предыдущих версий, который мы не меняли)
+    // ==================== ПЕРЕВОДЫ ИНТЕРФЕЙСА ====================
     const translations = {
         ru: { appTitle: "🗺️ Тайны вашего города", appSubtitle: "Пешеходные квесты по всему миру", selectCity: "🌆 Выберите город" },
         en: { appTitle: "🗺️ Secrets of Your City", appSubtitle: "Walking quests around the world", selectCity: "🌆 Choose a city" },
@@ -194,7 +298,7 @@
 
     function setLanguage(lang) { currentLang = lang; document.querySelectorAll('.lang-btn').forEach(btn => { btn.classList.remove('active'); if (btn.dataset.lang === lang) btn.classList.add('active'); }); updateUILanguage(); renderCitySelector(); if (currentCity && currentCity.id) { loadCity(citiesData[currentCity.id]); } saveProgress(); }
 
-    // Инициализация чата и обратной связи с ВАШИМИ НОВЫМИ НАСТРОЙКАМИ БОТА
+    // ==================== ИНИЦИАЛИЗАЦИЯ ЧАТА ====================
     function initChat() {
         const aiButton = document.getElementById('aiButton');
         const chatModal = document.getElementById('chatModal');
@@ -205,25 +309,50 @@
         aiButton.onclick = () => { chatModal.style.display = 'flex'; };
         chatClose.onclick = () => { chatModal.style.display = 'none'; };
         function addMessage(text, isUser) { const msgDiv = document.createElement('div'); msgDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`; msgDiv.innerText = text; chatMessages.appendChild(msgDiv); chatMessages.scrollTop = chatMessages.scrollHeight; }
-        function getBotAnswer(question) { const q = question.toLowerCase(); if (q.includes('балл') || q.includes('правил') || q.includes('score')) { return 'Баллы: 3 (1 попытка), 2 (2), 1 (3). После 3 ошибок — подсказка и 0 баллов. Максимум 30-45 баллов.'; } if (q.includes('где') || q.includes('искать')) { return 'Каждая точка — реальный объект. Ищите таблички, памятники, информационные стенды.'; } if (q.includes('маршрут') && currentCity) { return `Маршрут ${currentCity.routeDistance} км, время ~${currentCity.estimatedTime} часа.`; } return 'Я AI-помощник квеста. Внимательно читайте загадки, ищите подсказки на месте. Если хотите оставить отзыв — нажмите кнопку 💬. Удачи!'; }
+        function getBotAnswer(question) { const q = question.toLowerCase(); if (q.includes('балл') || q.includes('правил') || q.includes('score')) { return 'Баллы: 3 (1 попытка), 2 (2), 1 (3). После 3 ошибок — подсказка и 0 баллов. Максимум 30-45 баллов.'; } if (q.includes('где') || q.includes('искать')) { return 'Каждая точка — реальный объект. Ищите таблички, памятники, информационные стенды.'; } if (q.includes('маршрут') && currentCity) { return `Маршрут ${currentCity.routeDistance} км, время ~${currentCity.estimatedTime} часа.`; } return 'Я AI-помощник квеста. Внимательно читайте загадки, ищите подсказки на месте. Если хотите поддержать проект — нажмите кнопку ☕. Удачи!'; }
         chatSend.onclick = () => { const text = chatInput.value.trim(); if (!text) return; addMessage(text, true); const reply = getBotAnswer(text); setTimeout(() => addMessage(reply, false), 400); chatInput.value = ''; };
         chatInput.onkeypress = (e) => { if (e.key === 'Enter') chatSend.click(); };
     }
 
+    // ==================== ИНИЦИАЛИЗАЦИЯ ОБРАТНОЙ СВЯЗИ ====================
     function initFeedback() {
         const feedbackBtn = document.getElementById('feedbackButton');
         const feedbackModal = document.getElementById('feedbackModal');
         const feedbackClose = document.getElementById('feedbackClose');
         feedbackBtn.onclick = () => { feedbackModal.style.display = 'flex'; };
         feedbackClose.onclick = () => { feedbackModal.style.display = 'none'; };
-        document.getElementById('feedbackTelegram').onclick = () => { window.open(TELEGRAM_BOT_URL, '_blank'); feedbackModal.style.display = 'none'; };
-        document.getElementById('feedbackEmailCopy').onclick = () => { navigator.clipboard.writeText('support@example.com'); showMessage('📧 Email скопирован!'); feedbackModal.style.display = 'none'; };
+        document.getElementById('feedbackTelegram').onclick = () => { window.open('https://t.me/Quest_supportbot', '_blank'); feedbackModal.style.display = 'none'; };
+        document.getElementById('feedbackEmailCopy').onclick = () => { navigator.clipboard.writeText('quest@tobolsk-quest.com'); showMessage('📧 Email скопирован!'); feedbackModal.style.display = 'none'; };
         document.getElementById('feedbackTextCopy').onclick = () => { const template = `Тема: [Квест] Отзыв / Пожелание / Жалоба\n\nЗдравствуйте, команда квеста «Тайны вашего города»!\n\nИграл в городе: ${currentCity ? (currentCity.name.ru || 'не выбран') : 'не выбран'}\nВерсия квеста: 2.0\n\nМои впечатления / идеи / замечания:\n---\n(напишите здесь своё сообщение)`; navigator.clipboard.writeText(template); showMessage('✏️ Шаблон скопирован! Осталось вставить в письмо.'); feedbackModal.style.display = 'none'; };
     }
 
+    // ==================== ИНИЦИАЛИЗАЦИЯ ДОНАТОВ ====================
+    function initDonate() {
+        const donateBtn = document.getElementById('donateButton');
+        const donateModal = document.getElementById('donateModal');
+        const donateClose = document.getElementById('donateClose');
+        
+        donateBtn.onclick = () => { donateModal.style.display = 'flex'; };
+        donateClose.onclick = () => { donateModal.style.display = 'none'; };
+        
+        document.getElementById('donateBoosty').onclick = () => {
+            window.open(DONATE_URLS.boosty, '_blank');
+            donateModal.style.display = 'none';
+        };
+        document.getElementById('donateBuymeacoffee').onclick = () => {
+            window.open(DONATE_URLS.buymeacoffee, '_blank');
+            donateModal.style.display = 'none';
+        };
+        document.getElementById('donateTelegram').onclick = () => {
+            window.open(DONATE_URLS.telegram, '_blank');
+            donateModal.style.display = 'none';
+        };
+    }
+
+    // ==================== ЗАПУСК ====================
     document.addEventListener('DOMContentLoaded', () => {
         stepsContainer = document.getElementById('stepsContainer'); totalSpan = document.getElementById('totalScore'); completedSpan = document.getElementById('completedCount'); totalPointsSpan = document.getElementById('totalPoints'); progressBar = document.getElementById('progressBar'); congratsDiv = document.getElementById('congrats'); cityGrid = document.getElementById('cityGrid'); appTitleEl = document.getElementById('appTitle'); appSubtitleEl = document.getElementById('appSubtitle'); selectCityTitleEl = document.getElementById('selectCityTitle');
-        initChat(); initFeedback(); renderCitySelector();
+        initChat(); initFeedback(); initDonate(); renderCitySelector();
         document.querySelectorAll('.lang-btn').forEach(btn => { btn.addEventListener('click', () => setLanguage(btn.dataset.lang)); if (btn.dataset.lang === 'ru') btn.classList.add('active'); });
         updateUILanguage(); const savedProgress = loadProgress();
         if (savedProgress && savedProgress.currentCityId && citiesData[savedProgress.currentCityId]) { currentLang = savedProgress.currentLang || 'ru'; setLanguage(currentLang); loadCity(citiesData[savedProgress.currentCityId]).then(() => { currentIndex = savedProgress.currentIndex; scores = savedProgress.scores; attempts = savedProgress.attempts; completed = savedProgress.completed; hintShown = savedProgress.hintShown; totalScore = savedProgress.totalScore; updateUI(); renderCurrentQuestion(); }); } else { stepsContainer.innerHTML = '<div class="loading">🏙️ Выберите город из списка выше</div>'; }
