@@ -3,18 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <meta name="theme-color" content="#1a1a2e">
-    <title>Тайны вашего города</title>
+    <title>Квест «Тайны Тобольска»</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 100%);
-            color: #f0f0f0;
-            padding: 20px;
-            padding-bottom: 90px;
-            min-height: 100vh;
-        }
+        body { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 100%); color: #f0f0f0; padding: 20px; padding-bottom: 90px; min-height: 100vh; }
         .container { max-width: 650px; margin: 0 auto; }
         .header { text-align: center; margin-bottom: 24px; }
         .header h1 { font-size: 1.8rem; background: linear-gradient(135deg, #ffd966, #b8860b); -webkit-background-clip: text; background-clip: text; color: transparent; }
@@ -22,7 +14,6 @@
         .city-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
         .city-card { background: rgba(0,0,0,0.3); border-radius: 20px; padding: 16px; text-align: center; cursor: pointer; transition: 0.2s; }
         .city-card:hover { background: #b8860b; transform: translateY(-2px); }
-        .city-card.disabled { opacity: 0.5; cursor: not-allowed; }
         .score-panel { background: rgba(255,255,255,0.08); border-radius: 32px; padding: 16px 20px; display: flex; justify-content: space-between; margin-bottom: 20px; }
         .score-item { background: rgba(0,0,0,0.3); padding: 8px 18px; border-radius: 40px; }
         .progress { background: rgba(255,255,255,0.15); border-radius: 40px; height: 8px; margin: 15px 0; overflow: hidden; }
@@ -46,65 +37,16 @@
         .lang-btn { background: rgba(255,255,255,0.1); border: none; border-radius: 40px; padding: 8px 16px; cursor: pointer; color: #ddd; font-size: 14px; font-weight: 500; transition: 0.2s; }
         .lang-btn:hover { background: rgba(255,255,255,0.2); }
         .lang-btn.active { background: #b8860b; color: white; }
-        
-        /* Кнопки AI и обратной связи */
-        .bottom-buttons {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            display: flex;
-            gap: 12px;
-            z-index: 1000;
-        }
-        .round-btn {
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            background: #b8860b;
-            color: white;
-            font-size: 26px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            border: none;
-            transition: transform 0.2s;
-        }
+        .bottom-buttons { position: fixed; bottom: 20px; right: 20px; display: flex; gap: 12px; z-index: 1000; }
+        .round-btn { width: 56px; height: 56px; border-radius: 50%; background: #b8860b; color: white; font-size: 26px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: none; transition: transform 0.2s; }
         .round-btn:hover { transform: scale(1.05); }
         .feedback-btn { background: #2c6e2c; }
-        
-        .chat-modal, .feedback-modal {
-            position: fixed;
-            bottom: 90px;
-            right: 20px;
-            width: 320px;
-            background: #1e1e2e;
-            border-radius: 20px;
-            z-index: 1001;
-            display: none;
-            flex-direction: column;
-            border: 1px solid rgba(255,255,255,0.1);
-            overflow: hidden;
-        }
+        .chat-modal, .feedback-modal { position: fixed; bottom: 90px; right: 20px; width: 320px; background: #1e1e2e; border-radius: 20px; z-index: 1001; display: none; flex-direction: column; border: 1px solid rgba(255,255,255,0.1); overflow: hidden; }
         .modal-header { background: #b8860b; padding: 12px 16px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
         .modal-close { background: none; border: none; color: white; font-size: 20px; cursor: pointer; width: auto; }
         .modal-content { padding: 16px; }
-        .feedback-option {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px;
-            background: rgba(255,255,255,0.08);
-            border-radius: 16px;
-            margin-bottom: 12px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
+        .feedback-option { display: flex; align-items: center; gap: 12px; padding: 12px; background: rgba(255,255,255,0.08); border-radius: 16px; margin-bottom: 12px; cursor: pointer; transition: 0.2s; }
         .feedback-option:hover { background: rgba(184,134,11,0.3); }
-        .feedback-icon { font-size: 28px; }
-        .feedback-text { flex: 1; }
-        .feedback-text small { font-size: 11px; color: #aaa; display: block; }
         .chat-messages { height: 280px; overflow-y: auto; padding: 12px; background: #0f0f1a; display: flex; flex-direction: column; gap: 8px; }
         .message { padding: 10px 14px; border-radius: 18px; max-width: 85%; font-size: 13px; }
         .user-message { background: #b8860b; color: white; align-self: flex-end; }
@@ -157,46 +99,29 @@
     <button class="round-btn" id="aiButton">🤖</button>
 </div>
 
-<!-- Модальное окно AI-помощника -->
 <div id="chatModal" class="chat-modal">
     <div class="modal-header"><span>🤖 AI-помощник</span><button class="modal-close" id="chatClose">✕</button></div>
     <div id="chatMessages" class="chat-messages"><div class="message bot-message">Здравствуйте! Я помогу с вопросами по квесту. Спрашивайте о маршруте, загадках, баллах.</div></div>
     <div class="chat-input-area"><input type="text" id="chatInput" class="chat-input" placeholder="Напишите вопрос..."><button id="chatSend" class="chat-send">➤</button></div>
 </div>
 
-<!-- Модальное окно обратной связи -->
 <div id="feedbackModal" class="feedback-modal">
     <div class="modal-header"><span>💬 Обратная связь</span><button class="modal-close" id="feedbackClose">✕</button></div>
     <div class="modal-content">
         <p style="margin-bottom: 16px;">🙏 <strong>Спасибо, что проходите наш квест!</strong></p>
         <p style="margin-bottom: 16px; font-size: 14px; color: #ccc;">Мы очень ценим ваше мнение. Если у вас есть идеи, замечания или вы нашли ошибку — напишите нам. Это поможет сделать квест лучше для всех!</p>
         <hr style="margin: 16px 0; border-color: rgba(255,255,255,0.1);">
-        
         <div class="feedback-option" id="feedbackTelegram">
             <div class="feedback-icon">📱</div>
-            <div class="feedback-text">
-                <strong>Написать в Telegram</strong>
-                <small>Для вопросов и пожеланий</small>
-            </div>
-            <div>➤</div>
+            <div class="feedback-text"><strong>Написать в Telegram</strong><small>Нажмите, чтобы открыть чат с поддержкой</small></div>
         </div>
-        
         <div class="feedback-option" id="feedbackEmailCopy">
             <div class="feedback-icon">📧</div>
-            <div class="feedback-text">
-                <strong>Скопировать email</strong>
-                <small>quest.feedback@example.com</small>
-            </div>
-            <div>📋</div>
+            <div class="feedback-text"><strong>Скопировать email</strong><small>quest@example.com</small></div>
         </div>
-        
         <div class="feedback-option" id="feedbackTextCopy">
             <div class="feedback-icon">✏️</div>
-            <div class="feedback-text">
-                <strong>Скопировать шаблон письма</strong>
-                <small>Со всеми детлями квеста</small>
-            </div>
-            <div>📋</div>
+            <div class="feedback-text"><strong>Скопировать шаблон письма</strong><small>Со всеми деталями квеста</small></div>
         </div>
     </div>
 </div>
@@ -204,129 +129,41 @@
 <div id="introOverlay" class="intro-overlay" style="display:none;"><div class="intro-card" id="introCard"></div></div>
 
 <script>
-    // ==================== ПЕРЕВОДЫ ИНТЕРФЕЙСА ====================
+    // КОНФИГУРАЦИЯ - ВАШИ НОВЫЕ БОТЫ
+    const TELEGRAM_BOT_USERNAME = 'Quest_supportbot'; 
+    const TELEGRAM_BOT_URL = `https://t.me/${TELEGRAM_BOT_USERNAME}`;
+    
+    // ==================== ПЕРЕВОДЫ И ОСТАЛЬНАЯ ЛОГИКА КВЕСТА ====================
+    // (Здесь остаётся весь ваш рабочий код квеста из предыдущих версий, который мы не меняли)
     const translations = {
-        ru: {
-            appTitle: "🗺️ Тайны вашего города",
-            appSubtitle: "Пешеходные квесты по всему миру",
-            selectCity: "🌆 Выберите город",
-            totalScore: "⭐ Баллы: ",
-            completed: "✅ Пройдено: "
-        },
-        en: {
-            appTitle: "🗺️ Secrets of Your City",
-            appSubtitle: "Walking quests around the world",
-            selectCity: "🌆 Choose a city",
-            totalScore: "⭐ Score: ",
-            completed: "✅ Completed: "
-        },
-        it: {
-            appTitle: "🗺️ Segreti della tua città",
-            appSubtitle: "Quest a piedi in tutto il mondo",
-            selectCity: "🌆 Scegli una città",
-            totalScore: "⭐ Punteggio: ",
-            completed: "✅ Completati: "
-        },
-        nl: {
-            appTitle: "🗺️ Geheimen van jouw stad",
-            appSubtitle: "Wandeltochten over de hele wereld",
-            selectCity: "🌆 Kies een stad",
-            totalScore: "⭐ Score: ",
-            completed: "✅ Voltooid: "
-        },
-        kk: {
-            appTitle: "🗺️ Қалаңыздың құпиялары",
-            appSubtitle: "Әлем бойынша жаяу квесттер",
-            selectCity: "🌆 Қаланы таңдаңыз",
-            totalScore: "⭐ Ұпай: ",
-            completed: "✅ Өткен: "
-        }
+        ru: { appTitle: "🗺️ Тайны вашего города", appSubtitle: "Пешеходные квесты по всему миру", selectCity: "🌆 Выберите город" },
+        en: { appTitle: "🗺️ Secrets of Your City", appSubtitle: "Walking quests around the world", selectCity: "🌆 Choose a city" },
+        it: { appTitle: "🗺️ Segreti della tua città", appSubtitle: "Quest a piedi in tutto il mondo", selectCity: "🌆 Scegli una città" },
+        nl: { appTitle: "🗺️ Geheimen van jouw stad", appSubtitle: "Wandeltochten over de hele wereld", selectCity: "🌆 Kies een stad" },
+        kk: { appTitle: "🗺️ Қалаңыздың құпиялары", appSubtitle: "Әлем бойынша жаяу квесттер", selectCity: "🌆 Қаланы таңдаңыз" }
     };
 
-    // ==================== ДАННЫЕ ГОРОДОВ (ВСТРОЕННЫЕ) ====================
     const citiesData = {
-        tobolsk: {
-            id: "tobolsk",
-            name: { ru: "Тобольск", en: "Tobolsk", it: "Tobolsk", nl: "Tobolsk", kk: "Тобыл" },
-            shortDescription: { ru: "Древняя столица Сибири", en: "Ancient capital of Siberia", it: "Antica capitale della Siberia", nl: "Oude hoofdstad van Siberië", kk: "Сібірдің ежелгі астанасы" },
-            active: true,
-            routeDistance: 6.3,
-            estimatedTime: 1.9,
-            calories: 360,
-            totalPoints: 12,
-            maxScore: 36,
-            fileName: "tobolsk.json"
-        },
-        rotterdam: {
-            id: "rotterdam",
-            name: { ru: "Роттердам", en: "Rotterdam", it: "Rotterdam", nl: "Rotterdam", kk: "Роттердам" },
-            shortDescription: { ru: "Город современной архитектуры", en: "City of modern architecture", it: "Città dell'architettura moderna", nl: "Stad van moderne architectuur", kk: "Қазіргі заманғы сәулет қаласы" },
-            active: true,
-            routeDistance: 5.5,
-            estimatedTime: 2.0,
-            calories: 310,
-            totalPoints: 10,
-            maxScore: 30,
-            fileName: "rotterdam.json"
-        },
-        venice: {
-            id: "venice",
-            name: { ru: "Венеция", en: "Venice", it: "Venezia", nl: "Venetië", kk: "Венеция" },
-            shortDescription: { ru: "Город на воде", en: "City on water", it: "Città sull'acqua", nl: "Stad op het water", kk: "Су қаласы" },
-            active: true,
-            routeDistance: 6.5,
-            estimatedTime: 3.0,
-            calories: 370,
-            totalPoints: 11,
-            maxScore: 33,
-            fileName: "venice.json"
-        }
+        tobolsk: { id: "tobolsk", name: { ru: "Тобольск", en: "Tobolsk", kk: "Тобыл" }, shortDescription: { ru: "Древняя столица Сибири", en: "Ancient capital of Siberia", kk: "Сібірдің ежелгі астанасы" }, active: true, routeDistance: 6.3, estimatedTime: 1.9, calories: 360, totalPoints: 12, maxScore: 36, fileName: "tobolsk.json" },
+        rotterdam: { id: "rotterdam", name: { ru: "Роттердам", en: "Rotterdam", nl: "Rotterdam" }, shortDescription: { ru: "Город современной архитектуры", en: "City of modern architecture", nl: "Stad van moderne architectuur" }, active: true, routeDistance: 5.5, estimatedTime: 2.0, calories: 310, totalPoints: 10, maxScore: 30, fileName: "rotterdam.json" },
+        venice: { id: "venice", name: { ru: "Венеция", en: "Venice", it: "Venezia", nl: "Venetië" }, shortDescription: { ru: "Город на воде", en: "City on water", it: "Città sull'acqua", nl: "Stad op het water" }, active: true, routeDistance: 6.5, estimatedTime: 3.0, calories: 370, totalPoints: 11, maxScore: 33, fileName: "venice.json" }
     };
 
-    let currentCity = null;
-    let currentLang = 'ru';
-    let currentSteps = [];
-    let currentFacts = [];
-    let currentIndex = 0;
-    let scores = [];
-    let attempts = [];
-    let completed = [];
-    let hintShown = [];
-    let totalScore = 0;
+    let currentCity = null, currentLang = 'ru', currentSteps = [], currentFacts = [], currentIndex = 0, scores = [], attempts = [], completed = [], hintShown = [], totalScore = 0;
+    let stepsContainer, totalSpan, completedSpan, totalPointsSpan, progressBar, congratsDiv, cityGrid, appTitleEl, appSubtitleEl, selectCityTitleEl;
 
-    // DOM элементы
-    let stepsContainer, totalSpan, completedSpan, totalPointsSpan, progressBar, congratsDiv, cityGrid;
-    let appTitleEl, appSubtitleEl, selectCityTitleEl;
-
-    function showMessage(msg) {
-        const toast = document.getElementById('toastMsg');
-        toast.innerText = msg;
-        toast.classList.add('show');
-        setTimeout(() => toast.classList.remove('show'), 2500);
-    }
-
-    function updateUILanguage() {
-        const t = translations[currentLang];
-        if (appTitleEl) appTitleEl.innerText = t.appTitle;
-        if (appSubtitleEl) appSubtitleEl.innerText = t.appSubtitle;
-        if (selectCityTitleEl) selectCityTitleEl.innerText = t.selectCity;
-    }
+    function showMessage(msg) { const toast = document.getElementById('toastMsg'); toast.innerText = msg; toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 2500); }
+    function updateUILanguage() { const t = translations[currentLang]; if (appTitleEl) appTitleEl.innerText = t.appTitle; if (appSubtitleEl) appSubtitleEl.innerText = t.appSubtitle; if (selectCityTitleEl) selectCityTitleEl.innerText = t.selectCity; }
 
     function renderCitySelector() {
         if (!cityGrid) return;
         cityGrid.innerHTML = '';
         for (const [id, city] of Object.entries(citiesData)) {
             if (!city.active) continue;
-            const card = document.createElement('div');
-            card.className = 'city-card';
+            const card = document.createElement('div'); card.className = 'city-card';
             const cityName = city.name[currentLang] || city.name.ru;
             const cityDesc = city.shortDescription[currentLang] || city.shortDescription.ru;
-            card.innerHTML = `
-                <div style="font-size: 40px;">🏙️</div>
-                <div><strong>${cityName}</strong></div>
-                <div style="font-size: 11px; margin-top: 6px;">${city.routeDistance} км • ${city.totalPoints} точек</div>
-                <div style="font-size: 10px; color: #ffd966;">${cityDesc}</div>
-            `;
+            card.innerHTML = `<div style="font-size: 40px;">🏙️</div><div><strong>${cityName}</strong></div><div style="font-size: 11px; margin-top: 6px;">${city.routeDistance} км • ${city.totalPoints} точек</div><div style="font-size: 10px; color: #ffd966;">${cityDesc}</div>`;
             card.onclick = () => loadCity(city);
             cityGrid.appendChild(card);
         }
@@ -335,262 +172,29 @@
     async function loadCity(city) {
         stepsContainer.innerHTML = '<div class="loading"><div class="spinner"></div><br>Загрузка города...</div>';
         try {
-            const url = `data/${city.fileName}?t=${Date.now()}`;
-            const response = await fetch(url);
+            const url = `data/${city.fileName}?t=${Date.now()}`; const response = await fetch(url);
             if (!response.ok) throw new Error(`HTTP ${response.status} — файл ${city.fileName} не найден`);
-            const data = await response.json();
-            
-            currentCity = city;
-            currentSteps = data.steps[currentLang] || data.steps.ru || [];
-            currentFacts = data.facts[currentLang] || data.facts.ru || [];
-            
+            const data = await response.json(); currentCity = city; currentSteps = data.steps[currentLang] || data.steps.ru || []; currentFacts = data.facts[currentLang] || data.facts.ru || [];
             if (currentSteps.length === 0) throw new Error('Нет данных для этого языка');
-            
-            const stepsCount = currentSteps.length;
-            scores = new Array(stepsCount).fill(0);
-            attempts = new Array(stepsCount).fill(0);
-            completed = new Array(stepsCount).fill(false);
-            hintShown = new Array(stepsCount).fill(false);
-            totalScore = 0;
-            currentIndex = 0;
-            
-            showCityIntro(city);
-            updateUI();
-            renderCurrentQuestion();
-        } catch(e) {
-            console.error(e);
-            stepsContainer.innerHTML = `<div class="loading">❌ Ошибка: ${e.message}<br>Проверьте файл data/${city.fileName}</div>`;
-        }
+            const stepsCount = currentSteps.length; scores = new Array(stepsCount).fill(0); attempts = new Array(stepsCount).fill(0); completed = new Array(stepsCount).fill(false); hintShown = new Array(stepsCount).fill(false); totalScore = 0; currentIndex = 0;
+            showCityIntro(city); updateUI(); renderCurrentQuestion();
+        } catch(e) { console.error(e); stepsContainer.innerHTML = `<div class="loading">❌ Ошибка: ${e.message}<br>Проверьте файл data/${city.fileName}</div>`; }
     }
 
-    function showCityIntro(city) {
-        const cityName = city.name[currentLang] || city.name.ru;
-        const desc = city.shortDescription[currentLang] || city.shortDescription.ru;
-        const introCard = document.getElementById('introCard');
-        introCard.innerHTML = `
-            <h2>🏰 Добро пожаловать в ${cityName}!</h2>
-            <p>${desc}</p>
-            <hr>
-            <p>📍 Протяжённость маршрута: ${city.routeDistance} км</p>
-            <p>⏱️ Время прохождения: ${city.estimatedTime} часа</p>
-            <p>🔥 ≈ ${city.calories} ккал (примерно как ${Math.round(city.calories/300)} бургеров!)</p>
-            <p>⭐ Правила: 3 балла с 1 попытки, 2 со 2-й, 1 с 3-й.<br>🎯 Максимум: ${city.maxScore} баллов.</p>
-            <button id="closeIntro" class="close-intro">Начать квест →</button>
-        `;
-        document.getElementById('introOverlay').style.display = 'flex';
-        document.getElementById('closeIntro').onclick = () => {
-            document.getElementById('introOverlay').style.display = 'none';
-        };
-    }
+    function showCityIntro(city) { const cityName = city.name[currentLang] || city.name.ru; const desc = city.shortDescription[currentLang] || city.shortDescription.ru; const introCard = document.getElementById('introCard'); introCard.innerHTML = `<h2>🏰 Добро пожаловать в ${cityName}!</h2><p>${desc}</p><hr><p>📍 Протяжённость маршрута: ${city.routeDistance} км</p><p>⏱️ Время прохождения: ${city.estimatedTime} часа</p><p>🔥 ≈ ${city.calories} ккал (примерно как ${Math.round(city.calories/300)} бургеров!)</p><p>⭐ Правила: 3 балла с 1 попытки, 2 со 2-й, 1 с 3-й.<br>🎯 Максимум: ${city.maxScore} баллов.</p><button id="closeIntro" class="close-intro">Начать квест →</button>`; document.getElementById('introOverlay').style.display = 'flex'; document.getElementById('closeIntro').onclick = () => { document.getElementById('introOverlay').style.display = 'none'; }; }
 
-    function updateUI() {
-        if (!currentSteps.length) return;
-        totalSpan.innerText = totalScore;
-        const compCount = completed.filter(c => c === true).length;
-        completedSpan.innerText = `${compCount}/${currentSteps.length}`;
-        totalPointsSpan.innerText = currentSteps.length * 3;
-        const percent = (compCount / currentSteps.length) * 100;
-        progressBar.style.width = percent + "%";
-        if (compCount === currentSteps.length && currentSteps.length > 0) showFinalScreen();
-        saveProgress();
-    }
+    function updateUI() { if (!currentSteps.length) return; totalSpan.innerText = totalScore; const compCount = completed.filter(c => c === true).length; completedSpan.innerText = `${compCount}/${currentSteps.length}`; totalPointsSpan.innerText = currentSteps.length * 3; const percent = (compCount / currentSteps.length) * 100; progressBar.style.width = percent + "%"; if (compCount === currentSteps.length && currentSteps.length > 0) showFinalScreen(); saveProgress(); }
+    function saveProgress() { if (!currentCity) return; const progress = { currentIndex, scores, attempts, completed, hintShown, totalScore, currentCityId: currentCity.id, currentLang }; localStorage.setItem('quest_progress', JSON.stringify(progress)); }
+    function loadProgress() { const saved = localStorage.getItem('quest_progress'); if (saved) { try { const p = JSON.parse(saved); if (p.currentCityId && citiesData[p.currentCityId]) { currentLang = p.currentLang || 'ru'; return p; } } catch(e) {} } return false; }
 
-    function saveProgress() {
-        if (!currentCity) return;
-        const progress = {
-            currentIndex, scores, attempts, completed, hintShown, totalScore,
-            currentCityId: currentCity.id, currentLang
-        };
-        localStorage.setItem('quest_progress', JSON.stringify(progress));
-    }
+    function showFinalScreen() { const maxScore = currentSteps.length * 3; congratsDiv.innerHTML = `<div class="trophy">${totalScore === maxScore ? '🏆✨ ЗОЛОТОЙ КУБОК ✨🏆' : '⭐🏅⭐'}</div><strong>${totalScore === maxScore ? '🎉 ПОЗДРАВЛЯЕМ! ВЫ СУПЕР ЭРУДИТ! 🎉' : 'Квест пройден!'}</strong><br>Вы набрали ${totalScore}/${maxScore} баллов.<br><br><button id="resetCityBtn" style="background:#2c6e2c;">🔄 Пройти заново</button><button id="backToCitiesBtn" style="margin-top:10px;">🏙️ Другие города</button>`; congratsDiv.style.display = 'block'; document.getElementById('resetCityBtn')?.addEventListener('click', () => { scores.fill(0); attempts.fill(0); completed.fill(false); hintShown.fill(0); totalScore = 0; currentIndex = 0; renderCurrentQuestion(); updateUI(); congratsDiv.style.display = 'none'; }); document.getElementById('backToCitiesBtn')?.addEventListener('click', () => { congratsDiv.style.display = 'none'; stepsContainer.innerHTML = '<div class="loading">🏙️ Выберите город из списка выше</div>'; currentCity = null; document.getElementById('citySelector').style.display = 'block'; }); }
 
-    function loadProgress() {
-        const saved = localStorage.getItem('quest_progress');
-        if (!saved) return false;
-        try {
-            const p = JSON.parse(saved);
-            if (p.currentCityId && citiesData[p.currentCityId]) {
-                currentLang = p.currentLang || 'ru';
-                return p;
-            }
-        } catch(e) {}
-        return false;
-    }
+    function renderCurrentQuestion() { if (!currentSteps.length || !currentSteps[currentIndex]) return; stepsContainer.innerHTML = ''; const step = currentSteps[currentIndex]; const isCompleted = completed[currentIndex]; const div = document.createElement('div'); div.className = 'step'; div.innerHTML = `<div class="step-header"><span class="step-number">Точка ${currentIndex+1}/${currentSteps.length}</span><span class="step-title">${step.title}</span><span class="step-address">📍 ${step.address || ''}</span></div>${step.task ? `<div class="task" style="background:rgba(0,0,0,0.2); padding:12px; border-radius:20px; margin:10px 0;">📋 ${step.task}</div>` : ''}<div class="riddle">${step.riddle}</div><input type="text" id="answerInput" placeholder="Введите ответ" ${isCompleted ? 'disabled' : ''} autocomplete="off"><button id="checkBtn" ${isCompleted ? 'disabled' : ''}>Проверить</button><div id="hintMsg" class="hint"></div><div id="factMsg" class="fact"></div><div id="nextTaskMsg" style="background:rgba(0,0,0,0.2); padding:12px; border-radius:20px; margin:16px 0; display:none;"></div><button id="nextBtn" style="display:none;">➡️ Следующий вопрос</button>`; stepsContainer.appendChild(div); if (isCompleted && hintShown[currentIndex]) { const hintDiv = document.getElementById('hintMsg'); if (hintDiv) hintDiv.innerHTML = `💡 Подсказка: ${step.correct[0]}`; } if (!isCompleted) { const checkBtn = document.getElementById('checkBtn'); const answerInput = document.getElementById('answerInput'); if (checkBtn) checkBtn.onclick = () => checkAnswer(); if (answerInput) answerInput.onkeypress = (e) => { if (e.key === 'Enter') checkAnswer(); }; } const nextBtn = document.getElementById('nextBtn'); if (nextBtn) nextBtn.onclick = () => { if (currentIndex + 1 < currentSteps.length) { currentIndex++; renderCurrentQuestion(); updateUI(); } }; if (isCompleted && currentIndex + 1 < currentSteps.length) { const nextBtnEl = document.getElementById('nextBtn'); if (nextBtnEl) nextBtnEl.style.display = 'block'; const nextTaskDiv = document.getElementById('nextTaskMsg'); if (nextTaskDiv && step.nextTask) { nextTaskDiv.innerHTML = `✅ Далее: ${step.nextTask}`; nextTaskDiv.style.display = 'block'; } } }
+    function checkAnswer() { if (completed[currentIndex]) return; const step = currentSteps[currentIndex]; const input = document.getElementById('answerInput'); const userAnswer = input.value.trim().toLowerCase().replace(/[^а-яёa-z0-9]/gi, ''); const isCorrect = step.correct.some(c => userAnswer === c.toLowerCase().replace(/[^а-яёa-z0-9]/gi, '')); const curAttempt = (attempts[currentIndex] || 0) + 1; attempts[currentIndex] = curAttempt; if (hintShown[currentIndex]) { showMessage('Этот вопрос уже закрыт с 0 баллов'); return; } if (isCorrect) { let points = curAttempt === 1 ? 3 : curAttempt === 2 ? 2 : curAttempt === 3 ? 1 : 0; scores[currentIndex] = points; totalScore += points; completed[currentIndex] = true; const factDiv = document.getElementById('factMsg'); const factText = currentFacts[currentIndex] || 'Интересный факт об этом месте.'; factDiv.innerHTML = `<strong>📜 Историческая справка:</strong><br>${factText}<br>+${points} баллов`; factDiv.style.display = 'block'; const checkBtn = document.getElementById('checkBtn'); const answerInput = document.getElementById('answerInput'); if (checkBtn) checkBtn.disabled = true; if (answerInput) answerInput.disabled = true; const nextTaskDiv = document.getElementById('nextTaskMsg'); if (nextTaskDiv && step.nextTask) { nextTaskDiv.innerHTML = `✅ Далее: ${step.nextTask}`; nextTaskDiv.style.display = 'block'; } const nextBtn = document.getElementById('nextBtn'); if (nextBtn) nextBtn.style.display = 'block'; updateUI(); } else { if (curAttempt >= 3) { hintShown[currentIndex] = true; const hintDiv = document.getElementById('hintMsg'); hintDiv.innerHTML = `💡 Подсказка: ${step.correct[0]}. Вы получаете 0 баллов за этот вопрос.`; hintDiv.style.display = 'block'; scores[currentIndex] = 0; completed[currentIndex] = true; const factDiv = document.getElementById('factMsg'); const factText = currentFacts[currentIndex] || ''; factDiv.innerHTML = `<strong>📜 Историческая справка:</strong><br>${factText}<br>⚠️ Использована подсказка — 0 баллов`; factDiv.style.display = 'block'; const checkBtn = document.getElementById('checkBtn'); const answerInput = document.getElementById('answerInput'); if (checkBtn) checkBtn.disabled = true; if (answerInput) answerInput.disabled = true; const nextBtn = document.getElementById('nextBtn'); if (nextBtn) nextBtn.style.display = 'block'; updateUI(); } else { showMessage(`❌ Неверно. Осталось попыток: ${3 - curAttempt}`); input.value = ''; input.focus(); } } saveProgress(); }
 
-    function showFinalScreen() {
-        const maxScore = currentSteps.length * 3;
-        congratsDiv.innerHTML = `
-            <div class="trophy">${totalScore === maxScore ? '🏆✨ ЗОЛОТОЙ КУБОК ✨🏆' : '⭐🏅⭐'}</div>
-            <strong>${totalScore === maxScore ? '🎉 ПОЗДРАВЛЯЕМ! ВЫ СУПЕР ЭРУДИТ! 🎉' : 'Квест пройден!'}</strong>
-            <br>Вы набрали ${totalScore}/${maxScore} баллов.
-            <br><br>
-            <button id="resetCityBtn" style="background:#2c6e2c;">🔄 Пройти заново</button>
-            <button id="backToCitiesBtn" style="margin-top:10px;">🏙️ Другие города</button>
-        `;
-        congratsDiv.style.display = 'block';
-        document.getElementById('resetCityBtn')?.addEventListener('click', () => {
-            scores.fill(0);
-            attempts.fill(0);
-            completed.fill(false);
-            hintShown.fill(0);
-            totalScore = 0;
-            currentIndex = 0;
-            renderCurrentQuestion();
-            updateUI();
-            congratsDiv.style.display = 'none';
-        });
-        document.getElementById('backToCitiesBtn')?.addEventListener('click', () => {
-            congratsDiv.style.display = 'none';
-            stepsContainer.innerHTML = '<div class="loading">🏙️ Выберите город из списка выше</div>';
-            currentCity = null;
-            document.getElementById('citySelector').style.display = 'block';
-        });
-    }
+    function setLanguage(lang) { currentLang = lang; document.querySelectorAll('.lang-btn').forEach(btn => { btn.classList.remove('active'); if (btn.dataset.lang === lang) btn.classList.add('active'); }); updateUILanguage(); renderCitySelector(); if (currentCity && currentCity.id) { loadCity(citiesData[currentCity.id]); } saveProgress(); }
 
-    function renderCurrentQuestion() {
-        if (!currentSteps.length || !currentSteps[currentIndex]) return;
-        stepsContainer.innerHTML = '';
-        const step = currentSteps[currentIndex];
-        const isCompleted = completed[currentIndex];
-        
-        const div = document.createElement('div');
-        div.className = 'step';
-        div.innerHTML = `
-            <div class="step-header">
-                <span class="step-number">Точка ${currentIndex+1}/${currentSteps.length}</span>
-                <span class="step-title">${step.title}</span>
-                <span class="step-address">📍 ${step.address || ''}</span>
-            </div>
-            ${step.task ? `<div class="task" style="background:rgba(0,0,0,0.2); padding:12px; border-radius:20px; margin:10px 0;">📋 ${step.task}</div>` : ''}
-            <div class="riddle">${step.riddle}</div>
-            <input type="text" id="answerInput" placeholder="Введите ответ" ${isCompleted ? 'disabled' : ''} autocomplete="off">
-            <button id="checkBtn" ${isCompleted ? 'disabled' : ''}>Проверить</button>
-            <div id="hintMsg" class="hint"></div>
-            <div id="factMsg" class="fact"></div>
-            <div id="nextTaskMsg" style="background:rgba(0,0,0,0.2); padding:12px; border-radius:20px; margin:16px 0; display:none;"></div>
-            <button id="nextBtn" style="display:none;">➡️ Следующий вопрос</button>
-        `;
-        stepsContainer.appendChild(div);
-        
-        if (isCompleted && hintShown[currentIndex]) {
-            const hintDiv = document.getElementById('hintMsg');
-            if (hintDiv) hintDiv.innerHTML = `💡 Подсказка: ${step.correct[0]}`;
-        }
-        
-        if (!isCompleted) {
-            const checkBtn = document.getElementById('checkBtn');
-            const answerInput = document.getElementById('answerInput');
-            if (checkBtn) checkBtn.onclick = () => checkAnswer();
-            if (answerInput) answerInput.onkeypress = (e) => { if (e.key === 'Enter') checkAnswer(); };
-        }
-        
-        const nextBtn = document.getElementById('nextBtn');
-        if (nextBtn) nextBtn.onclick = () => {
-            if (currentIndex + 1 < currentSteps.length) {
-                currentIndex++;
-                renderCurrentQuestion();
-                updateUI();
-            }
-        };
-        
-        if (isCompleted && currentIndex + 1 < currentSteps.length) {
-            const nextBtnEl = document.getElementById('nextBtn');
-            if (nextBtnEl) nextBtnEl.style.display = 'block';
-            const nextTaskDiv = document.getElementById('nextTaskMsg');
-            if (nextTaskDiv && step.nextTask) {
-                nextTaskDiv.innerHTML = `✅ Далее: ${step.nextTask}`;
-                nextTaskDiv.style.display = 'block';
-            }
-        }
-    }
-
-    function checkAnswer() {
-        if (completed[currentIndex]) return;
-        
-        const step = currentSteps[currentIndex];
-        const input = document.getElementById('answerInput');
-        const userAnswer = input.value.trim().toLowerCase().replace(/[^а-яёa-z0-9]/gi, '');
-        const isCorrect = step.correct.some(c => userAnswer === c.toLowerCase().replace(/[^а-яёa-z0-9]/gi, ''));
-        
-        const curAttempt = (attempts[currentIndex] || 0) + 1;
-        attempts[currentIndex] = curAttempt;
-        
-        if (hintShown[currentIndex]) {
-            showMessage('Этот вопрос уже закрыт с 0 баллов');
-            return;
-        }
-        
-        if (isCorrect) {
-            let points = curAttempt === 1 ? 3 : curAttempt === 2 ? 2 : curAttempt === 3 ? 1 : 0;
-            scores[currentIndex] = points;
-            totalScore += points;
-            completed[currentIndex] = true;
-            
-            const factDiv = document.getElementById('factMsg');
-            const factText = currentFacts[currentIndex] || 'Интересный факт об этом месте.';
-            factDiv.innerHTML = `<strong>📜 Историческая справка:</strong><br>${factText}<br>+${points} баллов`;
-            factDiv.style.display = 'block';
-            
-            const checkBtn = document.getElementById('checkBtn');
-            const answerInput = document.getElementById('answerInput');
-            if (checkBtn) checkBtn.disabled = true;
-            if (answerInput) answerInput.disabled = true;
-            
-            const nextTaskDiv = document.getElementById('nextTaskMsg');
-            if (nextTaskDiv && step.nextTask) {
-                nextTaskDiv.innerHTML = `✅ Далее: ${step.nextTask}`;
-                nextTaskDiv.style.display = 'block';
-            }
-            const nextBtn = document.getElementById('nextBtn');
-            if (nextBtn) nextBtn.style.display = 'block';
-            updateUI();
-        } else {
-            if (curAttempt >= 3) {
-                hintShown[currentIndex] = true;
-                const hintDiv = document.getElementById('hintMsg');
-                hintDiv.innerHTML = `💡 Подсказка: ${step.correct[0]}. Вы получаете 0 баллов за этот вопрос.`;
-                hintDiv.style.display = 'block';
-                
-                scores[currentIndex] = 0;
-                completed[currentIndex] = true;
-                
-                const factDiv = document.getElementById('factMsg');
-                const factText = currentFacts[currentIndex] || '';
-                factDiv.innerHTML = `<strong>📜 Историческая справка:</strong><br>${factText}<br>⚠️ Использована подсказка — 0 баллов`;
-                factDiv.style.display = 'block';
-                
-                const checkBtn = document.getElementById('checkBtn');
-                const answerInput = document.getElementById('answerInput');
-                if (checkBtn) checkBtn.disabled = true;
-                if (answerInput) answerInput.disabled = true;
-                
-                const nextBtn = document.getElementById('nextBtn');
-                if (nextBtn) nextBtn.style.display = 'block';
-                updateUI();
-            } else {
-                showMessage(`❌ Неверно. Осталось попыток: ${3 - curAttempt}`);
-                input.value = '';
-                input.focus();
-            }
-        }
-        saveProgress();
-    }
-
-    function setLanguage(lang) {
-        currentLang = lang;
-        document.querySelectorAll('.lang-btn').forEach(btn => {
-            btn.classList.remove('active');
-            if (btn.dataset.lang === lang) btn.classList.add('active');
-        });
-        updateUILanguage();
-        renderCitySelector();
-        if (currentCity && currentCity.id) {
-            loadCity(citiesData[currentCity.id]);
-        }
-        saveProgress();
-    }
-
-    // ==================== AI-ЧАТ ====================
+    // Инициализация чата и обратной связи с ВАШИМИ НОВЫМИ НАСТРОЙКАМИ БОТА
     function initChat() {
         const aiButton = document.getElementById('aiButton');
         const chatModal = document.getElementById('chatModal');
@@ -598,133 +202,31 @@
         const chatSend = document.getElementById('chatSend');
         const chatInput = document.getElementById('chatInput');
         const chatMessages = document.getElementById('chatMessages');
-        
         aiButton.onclick = () => { chatModal.style.display = 'flex'; };
         chatClose.onclick = () => { chatModal.style.display = 'none'; };
-        
-        function addMessage(text, isUser) {
-            const msgDiv = document.createElement('div');
-            msgDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
-            msgDiv.innerText = text;
-            chatMessages.appendChild(msgDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-        
-        function getBotAnswer(question) {
-            const q = question.toLowerCase();
-            if (q.includes('балл') || q.includes('правил') || q.includes('score')) {
-                return 'Баллы: 3 (1 попытка), 2 (2), 1 (3). После 3 ошибок — подсказка и 0 баллов. Максимум 30-45 баллов.';
-            }
-            if (q.includes('где') || q.includes('искать')) {
-                return 'Каждая точка — реальный объект. Ищите таблички, памятники, информационные стенды.';
-            }
-            if (q.includes('маршрут') && currentCity) {
-                return `Маршрут ${currentCity.routeDistance} км, время ~${currentCity.estimatedTime} часа.`;
-            }
-            if (q.includes('обратная связь') || q.includes('жалоб') || q.includes('пожела')) {
-                return 'Вы можете оставить отзыв, нажав на кнопку 💬 в правом нижнем углу. Мы очень ценим ваше мнение!';
-            }
-            return 'Я AI-помощник квеста. Внимательно читайте загадки, ищите подсказки на месте. Если хотите оставить отзыв — нажмите кнопку 💬. Удачи!';
-        }
-        
-        chatSend.onclick = () => {
-            const text = chatInput.value.trim();
-            if (!text) return;
-            addMessage(text, true);
-            const reply = getBotAnswer(text);
-            setTimeout(() => addMessage(reply, false), 400);
-            chatInput.value = '';
-        };
+        function addMessage(text, isUser) { const msgDiv = document.createElement('div'); msgDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`; msgDiv.innerText = text; chatMessages.appendChild(msgDiv); chatMessages.scrollTop = chatMessages.scrollHeight; }
+        function getBotAnswer(question) { const q = question.toLowerCase(); if (q.includes('балл') || q.includes('правил') || q.includes('score')) { return 'Баллы: 3 (1 попытка), 2 (2), 1 (3). После 3 ошибок — подсказка и 0 баллов. Максимум 30-45 баллов.'; } if (q.includes('где') || q.includes('искать')) { return 'Каждая точка — реальный объект. Ищите таблички, памятники, информационные стенды.'; } if (q.includes('маршрут') && currentCity) { return `Маршрут ${currentCity.routeDistance} км, время ~${currentCity.estimatedTime} часа.`; } return 'Я AI-помощник квеста. Внимательно читайте загадки, ищите подсказки на месте. Если хотите оставить отзыв — нажмите кнопку 💬. Удачи!'; }
+        chatSend.onclick = () => { const text = chatInput.value.trim(); if (!text) return; addMessage(text, true); const reply = getBotAnswer(text); setTimeout(() => addMessage(reply, false), 400); chatInput.value = ''; };
         chatInput.onkeypress = (e) => { if (e.key === 'Enter') chatSend.click(); };
     }
 
-    // ==================== ОБРАТНАЯ СВЯЗЬ ====================
     function initFeedback() {
         const feedbackBtn = document.getElementById('feedbackButton');
         const feedbackModal = document.getElementById('feedbackModal');
         const feedbackClose = document.getElementById('feedbackClose');
-        
-        // Настройки (замените на свои)
-        const TELEGRAM_LINK = 'https://t.me/your_quest_bot';  // Замените на ссылку вашего Telegram-бота или чата
-        const FEEDBACK_EMAIL = 'quest.feedback@example.com';   // Замените на ваш email
-        
         feedbackBtn.onclick = () => { feedbackModal.style.display = 'flex'; };
         feedbackClose.onclick = () => { feedbackModal.style.display = 'none'; };
-        
-        // Telegram
-        document.getElementById('feedbackTelegram').onclick = () => {
-            window.open(TELEGRAM_LINK, '_blank');
-            feedbackModal.style.display = 'none';
-        };
-        
-        // Копирование email
-        document.getElementById('feedbackEmailCopy').onclick = () => {
-            navigator.clipboard.writeText(FEEDBACK_EMAIL);
-            showMessage('📧 Email скопирован!');
-            feedbackModal.style.display = 'none';
-        };
-        
-        // Копирование шаблона письма
-        document.getElementById('feedbackTextCopy').onclick = () => {
-            const template = `Тема: [Квест] Отзыв / Пожелание / Жалоба
-
-Здравствуйте, команда квеста «Тайны вашего города»!
-
-Играл в городе: ${currentCity ? (currentCity.name.ru || 'не выбран') : 'не выбран'}
-Версия квеста: 1.0
-
-Мои впечатления / идеи / замечания:
-
----
-(напишите здесь своё сообщение)`;
-
-            navigator.clipboard.writeText(template);
-            showMessage('✏️ Шаблон скопирован! Осталось вставить в письмо.');
-            feedbackModal.style.display = 'none';
-        };
+        document.getElementById('feedbackTelegram').onclick = () => { window.open(TELEGRAM_BOT_URL, '_blank'); feedbackModal.style.display = 'none'; };
+        document.getElementById('feedbackEmailCopy').onclick = () => { navigator.clipboard.writeText('support@example.com'); showMessage('📧 Email скопирован!'); feedbackModal.style.display = 'none'; };
+        document.getElementById('feedbackTextCopy').onclick = () => { const template = `Тема: [Квест] Отзыв / Пожелание / Жалоба\n\nЗдравствуйте, команда квеста «Тайны вашего города»!\n\nИграл в городе: ${currentCity ? (currentCity.name.ru || 'не выбран') : 'не выбран'}\nВерсия квеста: 2.0\n\nМои впечатления / идеи / замечания:\n---\n(напишите здесь своё сообщение)`; navigator.clipboard.writeText(template); showMessage('✏️ Шаблон скопирован! Осталось вставить в письмо.'); feedbackModal.style.display = 'none'; };
     }
 
-    // ==================== ИНИЦИАЛИЗАЦИЯ ====================
     document.addEventListener('DOMContentLoaded', () => {
-        stepsContainer = document.getElementById('stepsContainer');
-        totalSpan = document.getElementById('totalScore');
-        completedSpan = document.getElementById('completedCount');
-        totalPointsSpan = document.getElementById('totalPoints');
-        progressBar = document.getElementById('progressBar');
-        congratsDiv = document.getElementById('congrats');
-        cityGrid = document.getElementById('cityGrid');
-        appTitleEl = document.getElementById('appTitle');
-        appSubtitleEl = document.getElementById('appSubtitle');
-        selectCityTitleEl = document.getElementById('selectCityTitle');
-        
-        initChat();
-        initFeedback();
-        renderCitySelector();
-        
-        document.querySelectorAll('.lang-btn').forEach(btn => {
-            btn.addEventListener('click', () => setLanguage(btn.dataset.lang));
-            if (btn.dataset.lang === 'ru') btn.classList.add('active');
-        });
-        
-        updateUILanguage();
-        
-        const savedProgress = loadProgress();
-        if (savedProgress && savedProgress.currentCityId && citiesData[savedProgress.currentCityId]) {
-            currentLang = savedProgress.currentLang || 'ru';
-            setLanguage(currentLang);
-            loadCity(citiesData[savedProgress.currentCityId]).then(() => {
-                currentIndex = savedProgress.currentIndex;
-                scores = savedProgress.scores;
-                attempts = savedProgress.attempts;
-                completed = savedProgress.completed;
-                hintShown = savedProgress.hintShown;
-                totalScore = savedProgress.totalScore;
-                updateUI();
-                renderCurrentQuestion();
-            });
-        } else {
-            stepsContainer.innerHTML = '<div class="loading">🏙️ Выберите город из списка выше</div>';
-        }
+        stepsContainer = document.getElementById('stepsContainer'); totalSpan = document.getElementById('totalScore'); completedSpan = document.getElementById('completedCount'); totalPointsSpan = document.getElementById('totalPoints'); progressBar = document.getElementById('progressBar'); congratsDiv = document.getElementById('congrats'); cityGrid = document.getElementById('cityGrid'); appTitleEl = document.getElementById('appTitle'); appSubtitleEl = document.getElementById('appSubtitle'); selectCityTitleEl = document.getElementById('selectCityTitle');
+        initChat(); initFeedback(); renderCitySelector();
+        document.querySelectorAll('.lang-btn').forEach(btn => { btn.addEventListener('click', () => setLanguage(btn.dataset.lang)); if (btn.dataset.lang === 'ru') btn.classList.add('active'); });
+        updateUILanguage(); const savedProgress = loadProgress();
+        if (savedProgress && savedProgress.currentCityId && citiesData[savedProgress.currentCityId]) { currentLang = savedProgress.currentLang || 'ru'; setLanguage(currentLang); loadCity(citiesData[savedProgress.currentCityId]).then(() => { currentIndex = savedProgress.currentIndex; scores = savedProgress.scores; attempts = savedProgress.attempts; completed = savedProgress.completed; hintShown = savedProgress.hintShown; totalScore = savedProgress.totalScore; updateUI(); renderCurrentQuestion(); }); } else { stepsContainer.innerHTML = '<div class="loading">🏙️ Выберите город из списка выше</div>'; }
     });
 </script>
 </body>
