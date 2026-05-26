@@ -1,9 +1,9 @@
 const CACHE_NAME = 'tobolsk-quest-v1';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/cities.json',
-  '/manifest.json'
+  '/tobolsk-quest/',
+  '/tobolsk-quest/index.html',
+  '/tobolsk-quest/cities.json',
+  '/tobolsk-quest/manifest.json'
 ];
 
 self.addEventListener('install', event => {
@@ -20,9 +20,7 @@ self.addEventListener('install', event => {
 self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request)
-      .then(response => {
-        return response || fetch(event.request);
-      })
+      .then(response => response || fetch(event.request))
   );
 });
 
