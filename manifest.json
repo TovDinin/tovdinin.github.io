@@ -1,24 +1,13 @@
 {
-  "name": "Тайны вашего города",
-  "short_name": "ГородКвест",
-  "description": "Пешеходные квесты по городам мира с загадками и AI-помощником",
-  "start_url": "/tobolsk-quest/",
-  "scope": "/tobolsk-quest/",
-  "display": "standalone",
   "background_color": "#f5f0e8",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "Тайны вашего города",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "ГородКвест",
+  "start_url": "/",
   "theme_color": "#1a1a2e",
-  "orientation": "portrait",
-  "icons": [
-    {
-      "src": "/tobolsk-quest/icons/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/tobolsk-quest/icons/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
-  ]
+  "id": "/",
+  "description": "Пешеходные квесты по городам мира с загадками и AI-помощником"
 }
