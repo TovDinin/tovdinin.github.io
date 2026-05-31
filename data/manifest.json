@@ -1,0 +1,13 @@
+{
+  "background_color": "#f5f0e8",
+  "dir": "auto",
+  "display": "standalone",
+  "name": "Тайны вашего города",
+  "orientation": "portrait",
+  "scope": "/tobolsk-quest/",
+  "short_name": "ГородКвест",
+  "start_url": "/tobolsk-quest/",
+  "theme_color": "#1a1a2e",
+  "id": "/",
+  "description": "Пешеходные квесты по городам мира с загадками и AI-помощником"
+}
