@@ -1,24 +1,102 @@
 {
-  "name": "Тайны вашего города",
+  "id": "/",
+  "name": "ГородКвест",
   "short_name": "ГородКвест",
-  "description": "Пешеходные квесты по городам мира с загадками и AI-помощником",
+  "description": "Пешеходные квесты по городам мира с разделами и AI-помощником",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#f5f0e8",
-  "theme_color": "#1a1a2e",
-  "orientation": "portrait",
+  "theme_color": "#2c3e50",
+  "background_color": "#ffffff",
+  "orientation": "portrait-primary",
+  "lang": "ru",
+  "dir": "ltr",
+  "categories": ["travel", "navigation", "entertainment", "games"],
+  "prefer_related_applications": false,
+  "related_applications": [],
   "icons": [
     {
-      "src": "/icons/icon-192.png",
-      "sizes": "192x192",
+      "src": "icons/icon-72.png",
+      "sizes": "72x72",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
-      "src": "/icons/icon-512.png",
+      "src": "icons/icon-96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/maskable-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icons/maskable-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "screenshots/screenshot-1.jpg",
+      "sizes": "1080x1920",
+      "type": "image/jpeg",
+      "form_factor": "wide",
+      "label": "Главный экран с картой квеста"
+    },
+    {
+      "src": "screenshots/screenshot-2.jpg",
+      "sizes": "1080x1920",
+      "type": "image/jpeg",
+      "form_factor": "wide",
+      "label": "Задание с AI-помощником"
+    },
+    {
+      "src": "screenshots/screenshot-mobile-1.jpg",
+      "sizes": "1080x1920",
+      "type": "image/jpeg",
+      "form_factor": "narrow",
+      "label": "Мобильный вид карты маршрута"
     }
   ]
 }
