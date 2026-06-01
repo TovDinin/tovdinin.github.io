@@ -359,5 +359,18 @@
         if (savedProgress && savedProgress.currentCityId && citiesData[savedProgress.currentCityId]) { currentLang = savedProgress.currentLang || 'ru'; setLanguage(currentLang); loadCity(citiesData[savedProgress.currentCityId]).then(() => { currentIndex = savedProgress.currentIndex; scores = savedProgress.scores; attempts = savedProgress.attempts; completed = savedProgress.completed; hintShown = savedProgress.hintShown; totalScore = savedProgress.totalScore; updateUI(); renderCurrentQuestion(); }); } else { stepsContainer.innerHTML = '<div class="loading">🏙️ Выберите город из списка выше</div>'; }
     });
 </script>
+<script>
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+        navigator.serviceWorker.register('/sw.js')
+            .then(function(reg) {
+                console.log('✅ SW registered:', reg.scope);
+            })
+            .catch(function(err) {
+                console.log('❌ SW error:', err);
+            });
+    });
+}
+</script>
 </body>
 </html>
